@@ -5,9 +5,6 @@ import {DateTime} from 'luxon'
 import { fetchGEItem, type GEItemData } from "../services/geService";
 export default function GETracker() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [loading, setLoading] = useState(false);
-
   const [items, setItems] = useLocalStorage<GEItemData[]>(
     "ge-tracker-items",
     []
@@ -208,7 +205,7 @@ const handleShowHistoryClicked = useCallback((itemName: string) => {
               <table style={{width: '100%'}}>
                 <tbody>
                   <tr>
-                    <td>
+                    <td style={{width: '50%'}}>
                       {item.name} 
                     </td>
                     <td style={{letterSpacing: '2px'}}>
@@ -225,14 +222,12 @@ const handleShowHistoryClicked = useCallback((itemName: string) => {
                   <button
                     className="primary"
                     onClick={() => refreshOne(item.name as string)}
-                    disabled={loading}
                   >
-                    {loading ? "Refreshing..." : "Refresh"}
+                    Refresh
                   </button>
                   <button
                     className={showHistory.get(item.name) === true ? 'secondary' : 'primary'}
                     onClick={() => handleShowHistoryClicked(item.name)}
-                    disabled={loading}
                   >
                     History
                   </button>
