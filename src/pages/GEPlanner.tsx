@@ -3,8 +3,11 @@ import { getLocalStorage } from '../hooks/useLocalStorage';
 import type { GEItemData } from '../types/Item';
 import type { PlannerItem, PlannerCategory, PlannerSubCategory } from '../types/Plans';
 import { getDiffBetweenNowAndDate } from '../services/dates';
+import { useNavigate } from 'react-router-dom';
 
 export default function GEPlanner() {
+  const navigate = useNavigate();
+
   const [selectedItemName, setSelectedItemName] = useState('any')
   const [selectedCategory, setSelectedCategory] = useState('any')
   const [selectedSubCategory, setSelectedSubCategory] = useState('any')
@@ -59,19 +62,22 @@ export default function GEPlanner() {
   }, [selectedItemName, selectedCategory, selectedSubCategory]);
 
   const handleItemNameClicked = (itemName: string) => {
-    window.open(`/geplanner/${itemName}`, "_blank", "noopener,noreferrer");
+    navigate(`/geplanner/${itemName}`);
   }
 
   const handleTrackerClicked = () => {
-    window.open(`/getracker`, "_blank", "noopener,noreferrer");
+    navigate(`/getracker`)
   }
-  
+
   return (
     <div className="container">
       <div className="panel">
         <div className='sticky-header'>
           <div>
             <h1>GE Planner Dashboard</h1>
+            <div style={{textAlign: 'center'}}>
+              Shows completed item plans to display total profits acroos various filters.
+            </div>
           </div>
           <div style={{textAlign: 'center'}}>
             <button className='primary-edit' onClick={handleTrackerClicked}>

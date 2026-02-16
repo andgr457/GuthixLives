@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getLocalStorage, useLocalStorage } from '../hooks/useLocalStorage';
 import { useRef, useState } from 'react';
 import type { Plan, PlannerCategory, PlannerItem, PlannerItemStatus, PlannerSubCategory } from '../types/Plans';
@@ -9,6 +9,7 @@ import { getDefaultPlannerFieldEditMap, isFieldEdit } from '../services/maps';
 import { getProfitTotal, PLANNER_ITEM_STATUS_VALUES } from '../services/plannerService';
 
 export default function GEPlannerItem() {
+  const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const FLAT_TAX = .02
@@ -341,11 +342,11 @@ export default function GEPlannerItem() {
   const itemsToShow = filtered ? filtered : itemPlans
 
   const handleDashboardClicked = () => {
-    window.open(`/geplanner`, "_blank", "noopener,noreferrer");
+    navigate(`/geplanner`);
   }
 
   const handleTrackerClicked = () => {
-    window.open(`/getracker`, "_blank", "noopener,noreferrer");
+    navigate(`/getracker`);
   }
 
   return (

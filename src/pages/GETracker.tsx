@@ -157,11 +157,16 @@ export default function GETracker() {
     navigate(`/geplanner/${encodeURIComponent(itemName)}`);
   }
 
+  const handleDashboardClicked = () => {
+    navigate('/geplanner')
+  }
+
   return (
     <div className="container">
       <div className="panel">
         <h1>GE Tracker</h1>
 
+          New Item Name (exact spacing)<br/>
         <div className="input-row">
           <input
             type="text"
@@ -195,6 +200,13 @@ export default function GETracker() {
             style={{ display: "none" }}
             onChange={importItems}
           />
+
+          <button
+            className="primary"
+            onClick={handleDashboardClicked}
+          >
+            Planner Dashboard
+          </button>
 
           <div style={{fontSize: 'smaller'}}>
             History only stores when prices change from currently stored values.
