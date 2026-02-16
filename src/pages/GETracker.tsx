@@ -2,14 +2,19 @@ import { useCallback, useState } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useRef } from "react";
 import {DateTime} from 'luxon'
-import { fetchGEItem, type GEItemData } from "../services/geService";
+import { fetchGEItem } from "../services/geService";
+import type { GEItemData } from '../types/Item';
+import { useNavigate } from 'react-router-dom';
+import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../services/dates';
+
 export default function GETracker() {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useLocalStorage<GEItemData[]>(
     "ge-tracker-items",
     []
   );
-    const [history, setHistory] = useLocalStorage<GEItemData[]>(
+  const [history, setHistory] = useLocalStorage<GEItemData[]>(
     "ge-tracker-history",
     []
   );
@@ -135,21 +140,22 @@ export default function GETracker() {
     }
   };
 
-const handleShowHistoryClicked = useCallback((itemName: string) => {
-  const dupe = new Map(showHistory); // copy current Map
+  const handleShowHistoryClicked = useCallback((itemName: string) => {
+    const dupe = new Map(showHistory); // copy current Map
 
-  if (!dupe.has(itemName)) {
-    console.log(itemName, 'setting showHistory = true');
-    dupe.set(itemName, true);
-  } else {
-    const current = dupe.get(itemName)!;   // get current value
-    dupe.set(itemName, !current);          // toggle it
-    console.log(itemName, 'toggling showHistory to', !current);
+    if (!dupe.has(itemName)) {
+      dupe.set(itemName, true);
+    } else {
+      const current = dupe.get(itemName)!;   // get current value
+      dupe.set(itemName, !current);          // toggle it
+    }
+
+    setShowHistory(dupe);
+  }, [showHistory]);
+
+  const handlePlannerClicked = (itemName: string) => {
+    navigate(`/geplanner/${encodeURIComponent(itemName)}`);
   }
-
-  setShowHistory(dupe);
-}, [showHistory]);
-
 
   return (
     <div className="container">
@@ -231,6 +237,12 @@ const handleShowHistoryClicked = useCallback((itemName: string) => {
                   >
                     History
                   </button>
+                  <button
+                    className={'primary'}
+                    onClick={() => handlePlannerClicked(item.name)}
+                  >
+                    Planner
+                  </button>
                 </div>
 
                 {/* Right-side danger buttons */}
@@ -251,45 +263,49 @@ const handleShowHistoryClicked = useCallback((itemName: string) => {
               </div>
 
             </li>
-            {showHistory?.get(item.name) && (
+            {showHistory?.get(item.name) === true && (
               <ul className="list">
                 {history
                   .filter((h) => h.name === item.name)
-                  .map((h, i) => (
-                    <li key={`${item.name}_${i}`} className="sub-list-item">
-                      <table style={{width: '100%'}}>
-                        <tbody>
-                          <tr>
-                            <td>
-                              {h.name} 
-                            </td>
-                            <td>
-                              {h.price ? `${h.price.toLocaleString()} GP` : ''}
-                            </td>
-                            <td>
-                              {h.timestamp &&
-                                DateTime.fromISO(h.timestamp)
-                                  .toLocal()
-                                  .toFormat("dd-MM-yyyy t")}
-                            </td>
-                            <td>
-                              {h.timestamp && (() => {
-                                const dt = DateTime.fromISO(h.timestamp).toLocal();
-                                const diff = DateTime.now().diff(dt, ["hours", "minutes"]).toObject();
+                  .map((h, i) => {
+                    const shortHintDiffs = getDiffBetweenNowAndDate(
+                      h.timestamp as string
+                    );
 
-                                const hours = Math.floor(diff.hours ?? 0);
-                                const minutes = Math.floor(diff.minutes ?? 0);
+                    return (
+                      <li
+                        key={`${item.name}_${i}`}
+                        className="sub-list-item"
+                      >
+                        <table style={{ width: "100%" }}>
+                          <tbody>
+                            <tr>
+                              <td>{h.name}</td>
 
-                                return `${hours}h ${minutes}m ago`;
-                              })()}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </li>
-                  ))}
+                              <td>
+                                {h.price
+                                  ? `${h.price.toLocaleString()} GP`
+                                  : ""}
+                              </td>
+
+                              <td>
+                                {h.timestamp &&
+                                  getLocalDateAndTime(h.timestamp)}
+                              </td>
+
+                              <td title={shortHintDiffs.hintValue}>
+                                {h.timestamp &&
+                                  shortHintDiffs.shortValue}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </li>
+                    );
+                  })}
               </ul>
             )}
+
             </>
           ))}
         </ul>

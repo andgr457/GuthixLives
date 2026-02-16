@@ -29,7 +29,7 @@ body {
 
 .panel {
   width: 100%;
-  max-width: 750px;
+  max-width: 70%;
   background: var(--panel);
   border: 3px solid var(--gold);
   border-radius: 8px;
@@ -95,6 +95,14 @@ button.primary {
   color: black;
 }
 
+button.primary-edit {
+  background: linear-gradient(to bottom, var(--gold), var(--gold-dark));
+  color: black;
+
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 button.primary:hover {
   filter: brightness(1.1);
 }
@@ -141,3 +149,64 @@ button.danger:hover {
   font-size: 0.9rem;            /* slightly smaller font to differentiate */
 }
 
+.rs-select {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  /* OSRS panel colors */
+  background-color: #2b261b; /* dark brown panel */
+  color: #ffd700;            /* gold text */
+
+  /* OSRS chunky border style */
+  border: 2px solid #5a4a2f;
+  border-top-color: #c9a24c;   /* highlight */
+  border-left-color: #c9a24c;  /* highlight */
+  border-right-color: #3f3316; /* shadow */
+  border-bottom-color: #3f3316;/* shadow */
+
+  padding: 5px 12px;
+  border-radius: 2px;
+
+  cursor: pointer;
+  outline: none;
+
+  appearance: none;       /* hide native arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* subtle OSRS hover transition */
+  transition: all 0.1s ease-in-out;
+}
+
+/* Hover effect */
+.rs-select:hover {
+  background-color: #3a3224;  /* slightly lighter panel */
+  border-color: #ffd700;      /* gold border on hover */
+}
+
+/* Focus effect */
+.rs-select:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+/* Custom arrow */
+.rs-select {
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23ffd700' height='10' viewBox='0 0 20 20' width='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;                  /* sticks to top */
+  z-index: 100;            /* sits above other content */
+  background-color: #2b261b; /* OSRS dark panel */
+  padding: 10px;
+  border-bottom: 2px solid #5a4a2f; /* OSRS-style border */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* subtle shadow */
+}
