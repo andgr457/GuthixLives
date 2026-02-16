@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { getLocalStorage, useLocalStorage } from '../hooks/useLocalStorage';
-import { useEffect, useRef, useState } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useRef, useState } from 'react';
 import type { Plan, PlannerCategory, PlannerItem, PlannerItemStatus, PlannerSubCategory } from '../types/Plans';
 import { DateTime } from 'luxon';
 import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../services/dates';

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getLocalStorage } from '../hooks/useLocalStorage';
 import type { GEItemData } from '../types/Item';
 import type { PlannerItem, PlannerCategory, PlannerSubCategory } from '../types/Plans';
@@ -53,7 +53,7 @@ export default function GEPlanner() {
         new Date(b.completedOn ?? 0).getTime() -
         new Date(a.completedOn ?? 0).getTime()
     );
-    
+
     return filtering;
 
   }, [selectedItemName, selectedCategory, selectedSubCategory]);
