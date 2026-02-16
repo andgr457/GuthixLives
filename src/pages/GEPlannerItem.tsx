@@ -159,11 +159,11 @@ export default function GEPlannerItem() {
       if(itemPlan.amount){
         if(itemPlan.soldPrice){
           const taxAmount = Math.floor(itemPlan.soldPrice * FLAT_TAX)
-          profit = (itemPlan.soldPrice - taxAmount) * itemPlan.amount
+          profit = ((itemPlan.soldPrice - taxAmount) - itemPlan.boughtPrice) * itemPlan.amount
         }
       }
     }
-    if(profit > 0){
+    if(profit > 0 || profit < 0){
       const newItems = itemPlans.map(ip => {
         if(ip.planId === planId){
           ip.profit = profit
@@ -183,11 +183,11 @@ export default function GEPlannerItem() {
       if(itemPlan.amount){
         if(itemPlan.soldPrice){
           const taxAmount = Math.floor(itemPlan.soldPrice * FLAT_TAX)
-          profit = (itemPlan.soldPrice - taxAmount) * itemPlan.amount
+          profit = ((itemPlan.soldPrice - taxAmount) - itemPlan.boughtPrice) * itemPlan.amount
         }
       }
     }
-    if(profit > 0){
+    if(profit > 0 || profit < 0){
       const newItems = itemPlans.map(ip => {
         if(ip.planId === planId){
           ip.profit = profit
@@ -533,16 +533,11 @@ export default function GEPlannerItem() {
               }
               const isTitleEdit = isFieldEdit('title', ip, fieldEditMap)
               let showCalculation = false
-              let calcTotal = 0
               let calcMade = 0
-              let calcTotalTaxed = 0
               if(ip.amount && ip.boughtPrice && ip.soldPrice){
                 showCalculation = true
-                
-                calcTotal = ip.amount * ip.soldPrice
-                const taxed = calcTotal * FLAT_TAX
-                calcTotalTaxed = calcTotal - taxed
-                calcMade = calcTotalTaxed - ip.boughtPrice
+                const taxAmount = ip.soldPrice * FLAT_TAX
+                calcMade = ((ip.soldPrice - taxAmount) - ip.boughtPrice) * ip.amount
               }
 
               return <li key={ip.planId} className='list-item'>
@@ -736,7 +731,7 @@ export default function GEPlannerItem() {
                   </div>
                   {showCalculation && <div>
                     <div style={{textAlign: 'center'}}>
-                      Estimated {calcMade.toLocaleString()} GP made.<br/>{calcTotalTaxed.toLocaleString()} GP total ({calcTotal.toLocaleString()} before tax).
+                      Estimated {calcMade.toLocaleString()} GP profits.
                       <br/>
                     <button className='primary-edit' onClick={() => {setItemPlanProfit(ip.planId)}}>
                       Confirm Profit
