@@ -13,3 +13,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   return [storedValue, setValue] as const;
 }
+
+export function getLocalStorage<T>(key: string) {
+  const item = localStorage.getItem(key);
+  return item ? JSON.parse(item) as T : []
+}

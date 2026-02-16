@@ -1,12 +1,4 @@
-export interface GEItemData {
-  name: string;
-  price?: number
-  timestamp?: string;
-}
-
-interface GEItemsMap {
-  [itemName: string]: GEItemData;
-}
+import type { GEItemData, GEItemsMap } from '../types/Item';
 
 // Fetch GE prices by item ID(s)
 export async function fetchGEItem(name: string): Promise<GEItemData> {
