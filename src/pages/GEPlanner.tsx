@@ -3,8 +3,11 @@ import { getLocalStorage } from '../hooks/useLocalStorage';
 import type { GEItemData } from '../types/Item';
 import type { PlannerItem, PlannerCategory, PlannerSubCategory } from '../types/Plans';
 import { getDiffBetweenNowAndDate } from '../services/dates';
+import { useNavigate } from 'react-router-dom';
 
 export default function GEPlanner() {
+  const navigate = useNavigate();
+
   const [selectedItemName, setSelectedItemName] = useState('any')
   const [selectedCategory, setSelectedCategory] = useState('any')
   const [selectedSubCategory, setSelectedSubCategory] = useState('any')
@@ -59,83 +62,97 @@ export default function GEPlanner() {
   }, [selectedItemName, selectedCategory, selectedSubCategory]);
 
   const handleItemNameClicked = (itemName: string) => {
-    window.open(`/geplanner/${itemName}`, "_blank", "noopener,noreferrer");
+    navigate(`/geplanner/${itemName}`);
+  }
+
+  const handleTrackerClicked = () => {
+    navigate(`/getracker`)
   }
 
   return (
     <div className="container">
       <div className="panel">
-        <div>
-          <h1>GE Planner Dashboard</h1>
-        </div>
-        <div>
-          {/* filters */}
-          <table style={{width: '100%'}}>
-            <tbody>
-              <tr>
-                <td>
-                  Item
-                  <select
-                    className="rs-select"
-                    value={selectedItemName}
-                    onChange={(e) =>
-                      setSelectedItemName(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
-
-                    {getLocalStorage<GEItemData[]>('ge-tracker-items')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+        <div className='sticky-header'>
+          <div>
+            <h1>GE Planner Dashboard</h1>
+            <div style={{textAlign: 'center'}}>
+              Shows completed item plans to display total profits acroos various filters.
+            </div>
+          </div>
+          <div style={{textAlign: 'center'}}>
+            <button className='primary-edit' onClick={handleTrackerClicked}>
+              GE Tracker
+            </button>
+          </div>
+          <div>
+            {/* filters */}
+            <table style={{width: '100%'}}>
+              <tbody>
+                <tr>
+                  <td>
+                    Item
+                    <select
+                      className="rs-select"
+                      value={selectedItemName}
+                      onChange={(e) =>
+                        setSelectedItemName(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  Category
-                  <select
-                    className="rs-select"
-                    value={selectedCategory}
-                    onChange={(e) =>
-                      setSelectedCategory(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
 
-                    {getLocalStorage<PlannerCategory[]>('ge-planner-categories')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+                      {getLocalStorage<GEItemData[]>('ge-tracker-items')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    Category
+                    <select
+                      className="rs-select"
+                      value={selectedCategory}
+                      onChange={(e) =>
+                        setSelectedCategory(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  Sub-Category
-                  <select
-                    className="rs-select"
-                    value={selectedSubCategory}
-                    onChange={(e) =>
-                      setSelectedSubCategory(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
 
-                    {getLocalStorage<PlannerSubCategory[]>('ge-planner-sub-categories')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+                      {getLocalStorage<PlannerCategory[]>('ge-planner-categories')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    Sub-Category
+                    <select
+                      className="rs-select"
+                      value={selectedSubCategory}
+                      onChange={(e) =>
+                        setSelectedSubCategory(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+                      {getLocalStorage<PlannerSubCategory[]>('ge-planner-sub-categories')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <hr/>
         <div style={{textAlign: 'center', fontSize: 'larger'}}>
