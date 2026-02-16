@@ -62,80 +62,91 @@ export default function GEPlanner() {
     window.open(`/geplanner/${itemName}`, "_blank", "noopener,noreferrer");
   }
 
+  const handleTrackerClicked = () => {
+    window.open(`/getracker`, "_blank", "noopener,noreferrer");
+  }
+  
   return (
     <div className="container">
       <div className="panel">
-        <div>
-          <h1>GE Planner Dashboard</h1>
-        </div>
-        <div>
-          {/* filters */}
-          <table style={{width: '100%'}}>
-            <tbody>
-              <tr>
-                <td>
-                  Item
-                  <select
-                    className="rs-select"
-                    value={selectedItemName}
-                    onChange={(e) =>
-                      setSelectedItemName(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
-
-                    {getLocalStorage<GEItemData[]>('ge-tracker-items')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+        <div className='sticky-header'>
+          <div>
+            <h1>GE Planner Dashboard</h1>
+          </div>
+          <div style={{textAlign: 'center'}}>
+            <button className='primary-edit' onClick={handleTrackerClicked}>
+              GE Tracker
+            </button>
+          </div>
+          <div>
+            {/* filters */}
+            <table style={{width: '100%'}}>
+              <tbody>
+                <tr>
+                  <td>
+                    Item
+                    <select
+                      className="rs-select"
+                      value={selectedItemName}
+                      onChange={(e) =>
+                        setSelectedItemName(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  Category
-                  <select
-                    className="rs-select"
-                    value={selectedCategory}
-                    onChange={(e) =>
-                      setSelectedCategory(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
 
-                    {getLocalStorage<PlannerCategory[]>('ge-planner-categories')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+                      {getLocalStorage<GEItemData[]>('ge-tracker-items')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    Category
+                    <select
+                      className="rs-select"
+                      value={selectedCategory}
+                      onChange={(e) =>
+                        setSelectedCategory(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-                <td>
-                  Sub-Category
-                  <select
-                    className="rs-select"
-                    value={selectedSubCategory}
-                    onChange={(e) =>
-                      setSelectedSubCategory(e.currentTarget.value)
-                    }
-                  >
-                    <option value="any">
-                      Any
-                    </option>
 
-                    {getLocalStorage<PlannerSubCategory[]>('ge-planner-sub-categories')?.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name.toUpperCase()}
+                      {getLocalStorage<PlannerCategory[]>('ge-planner-categories')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    Sub-Category
+                    <select
+                      className="rs-select"
+                      value={selectedSubCategory}
+                      onChange={(e) =>
+                        setSelectedSubCategory(e.currentTarget.value)
+                      }
+                    >
+                      <option value="any">
+                        Any
                       </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+                      {getLocalStorage<PlannerSubCategory[]>('ge-planner-sub-categories')?.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <hr/>
         <div style={{textAlign: 'center', fontSize: 'larger'}}>

@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { getLocalStorage, useLocalStorage } from '../hooks/useLocalStorage';
 import { useRef, useState } from 'react';
 import type { Plan, PlannerCategory, PlannerItem, PlannerItemStatus, PlannerSubCategory } from '../types/Plans';
 import { DateTime } from 'luxon';
@@ -15,10 +15,7 @@ export default function GEPlannerItem() {
 
   const { itemName } = useParams<{ itemName: string }>();
   
-  const [items, setItems] = useLocalStorage<GEItemData[]>(
-    "ge-tracker-items",
-    []
-  );
+  const [items] = useState<GEItemData[]>(getLocalStorage('ge-tracker-items'))
 
   const [plan, setPlan] = useLocalStorage<Plan>(
     `ge-planner-item-plan-${itemName ?? 'unknown'}`,
@@ -62,7 +59,7 @@ export default function GEPlannerItem() {
   const [filtered, setFiltered] = useState<PlannerItem[] | undefined>(undefined)
 
   const exportItems = () => {
-    const dataStr = JSON.stringify({plan, itemPlans, categories}, null, 2);
+    const dataStr = JSON.stringify({plan, itemPlans, categories, itemDefaultCategory, itemDefaultSubCategory}, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const date = DateTime.now().toFormat('dd-MM-yyyy')
@@ -89,6 +86,8 @@ export default function GEPlannerItem() {
         setPlan(parsed.plan);
         setItemPlans(parsed.itemPlans)
         setCategories(parsed.categories)
+        setItemDefaultCategory(parsed.itemDefaultCategory)
+        setItemDefaultSubCategory(parsed.itemDefaultSubCategory)
       } catch {
         alert("Failed to parse JSON.");
       }
@@ -345,6 +344,10 @@ export default function GEPlannerItem() {
     window.open(`/geplanner`, "_blank", "noopener,noreferrer");
   }
 
+  const handleTrackerClicked = () => {
+    window.open(`/getracker`, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <div className="container">
       <div className="panel">
@@ -358,6 +361,9 @@ export default function GEPlannerItem() {
                   <div style={{textAlign: 'center'}}>
                     <button className='primary-edit' onClick={handleDashboardClicked}>
                       Planner Dashboard
+                    </button>
+                    <button className='primary-edit' onClick={handleTrackerClicked}>
+                      GE Tracker
                     </button>
                   </div>
                 </td>
