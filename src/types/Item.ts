@@ -3,6 +3,7 @@ export interface TrackedItem {
 }
 
 export interface GEItemData {
+  id?: number
   name: string;
   price?: number
   timestamp?: string;
