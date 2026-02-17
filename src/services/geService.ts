@@ -9,10 +9,6 @@ export async function fetchGEItem(name: string): Promise<GEItemData> {
   try {
     parsed = JSON.parse(body)
     price = parsed[name].price
-    console.log('weirdgloop', parsed)
-    const rsRes = await fetch(`https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${parsed[name].id}`)
-    const rsText = await rsRes.text()
-    console.log('rs', rsText)
   }catch(error){
     console.error(error)
   }
