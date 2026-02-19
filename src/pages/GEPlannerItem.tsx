@@ -155,9 +155,9 @@ export default function GEPlannerItem() {
     const itemPlan = itemPlans.find(ip => ip.planId === planId)
     if(!itemPlan) return
     let profit = 0
-    if(itemPlan.boughtPrice){
-      if(itemPlan.amount){
-        if(itemPlan.soldPrice){
+    if(typeof itemPlan.boughtPrice === 'number'){
+      if(typeof itemPlan.amount === 'number'){
+        if(typeof itemPlan.soldPrice === 'number'){
           const taxAmount = Math.floor(itemPlan.soldPrice * FLAT_TAX)
           profit = ((itemPlan.soldPrice - taxAmount) - itemPlan.boughtPrice) * itemPlan.amount
         }
@@ -179,9 +179,9 @@ export default function GEPlannerItem() {
     const itemPlan = itemPlans.find(ip => ip.planId === planId)
     if(!itemPlan) return
     let profit = 0
-    if(itemPlan.boughtPrice){
-      if(itemPlan.amount){
-        if(itemPlan.soldPrice){
+    if(typeof itemPlan.boughtPrice === 'number'){
+      if(typeof itemPlan.amount === 'number'){
+        if(typeof itemPlan.soldPrice === 'number'){
           const taxAmount = Math.floor(itemPlan.soldPrice * FLAT_TAX)
           profit = ((itemPlan.soldPrice - taxAmount) - itemPlan.boughtPrice) * itemPlan.amount
         }
@@ -202,7 +202,7 @@ export default function GEPlannerItem() {
 
   const setItemPlanBuyPrice = (planId: string, price: number) => {
     if(typeof price !== 'number') return
-
+    
     const newPlans = itemPlans.map(ip => {
       if(ip.planId === planId){
         ip.boughtPrice = price
@@ -534,7 +534,7 @@ export default function GEPlannerItem() {
               const isTitleEdit = isFieldEdit('title', ip, fieldEditMap)
               let showCalculation = false
               let calcMade = 0
-              if(ip.amount && ip.boughtPrice && ip.soldPrice){
+              if(typeof ip.amount === 'number' && typeof ip.boughtPrice === 'number' && typeof ip.soldPrice === 'number'){
                 showCalculation = true
                 const taxAmount = ip.soldPrice * FLAT_TAX
                 calcMade = ((ip.soldPrice - taxAmount) - ip.boughtPrice) * ip.amount
@@ -575,7 +575,7 @@ export default function GEPlannerItem() {
                     }
 
                     {ip.profit && <div style={{textAlign: 'center'}}>
-                      <h1>Profit {ip.profit < 0 ? '-' : ip.profit === 0 ? '' : '+'}{ip.profit.toLocaleString()} GP</h1>
+                      <h1>Profit {ip.profit <= 0 ? '' : '+'}{ip.profit.toLocaleString()} GP</h1>
                     </div>}
                       
                     <table style={{width: '100%', textAlign: 'center'}}>
