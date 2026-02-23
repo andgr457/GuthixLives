@@ -11,11 +11,11 @@ export interface Task {
 
   /** Skilling */
   /** @example 22 xp per action  */
-  xpPerAction?: string
+  xpPerAction: number
   /** @example 20 traverse actions per minute = 440 xp (22 xp * 20 action)  */
-  actionsPerMinute?: number
+  actionsPerMinute: number
   /** @example 18,185 */
-  xpTarget?: number
+  xpTarget: number
   taskRuns: TaskRun[]
 }
 

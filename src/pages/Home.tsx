@@ -5,7 +5,7 @@ export default function Home() {
 
   const nav = () => {
     return <div>
-      <button className='primary-edit' onClick={() => {navigate('/toonPlanner')}}> </button>
+      <button className='primary-edit' onClick={() => {navigate('/toonPlanner')}}>Toon Planner</button>
     </div>
   }
 

@@ -2,8 +2,18 @@ import { useEffect, useState } from 'react'
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { DateTime } from 'luxon';
 import type { Toon, Task, TaskRun } from '../types/Toon';
+import { useNavigate } from 'react-router-dom';
+
+interface ToonToggle {
+  toonName: string
+  showTasks: boolean
+  newTaskName: string
+  showComplete: boolean
+}
 
 export default function ToonPlanner(){
+  const navigate = useNavigate()
+
   const [newToonName, setNewToonName] = useState<string>('')
   const [newTaskName, setNewTaskName] = useState<string>('')
 
@@ -14,6 +24,11 @@ export default function ToonPlanner(){
 
   const [tasks, setTasks] = useLocalStorage<Task[]>(
     'toon-tasks',
+    []
+  )
+
+  const [toggles, setToggles] = useLocalStorage<ToonToggle[]>(
+    'toon-toggles',
     []
   )
 
@@ -72,9 +87,11 @@ export default function ToonPlanner(){
   };
 
   const addTask = (toonName: string) => {
-    const trimmed = newTaskName.trim();
-    if (!trimmed) return;
 
+
+    const toggleValue = toggles?.find(t => t.toonName === toonName)?.newTaskName ?? ''
+    const trimmed = toggleValue.trim();
+    if (!trimmed) return;
     const exists = tasks.filter(i => i.name.toLowerCase().includes(trimmed.toLowerCase()))
 
     const newTask: Task = {
@@ -82,14 +99,26 @@ export default function ToonPlanner(){
       toonName,
       createdDate: DateTime.utc().toISO(),
       status: 'pending',
-      taskRuns: []
+      taskRuns: [],
+      actionsPerMinute: 0,
+      xpPerAction: 0,
+      xpTarget: 0
     }
     const newTasks: Task[] = []
     newTasks.push(newTask)
     for(const task of tasks){
       newTasks.push(task)
     }
+    const newToggles: ToonToggle[] = []
+    for(const toggle of toggles){
+      if(toggle.toonName === toonName){
+        toggle.newTaskName = ''
+        toggle.showTasks = true
+      }
+      newToggles.push(toggle)
+    }
     setTasks(newTasks)
+    setToggles(newToggles)
     setNewTaskName("");
   };
 
@@ -111,12 +140,88 @@ export default function ToonPlanner(){
     setTasks(newTasks)
   };
 
+  const updateTask = (taskName: string, prop: string, value: string | number | boolean) => {
+    
+    const newTasks: Task[] = []
+    for(const task of tasks){
+      if(task.name === taskName){
+        //@ts-ignore
+        task[prop] = value as any
+      }
+      newTasks.push(task)
+    }
+    setTasks(newTasks)
+  }
+
+  const updateToggles = (toonName: string, prop: string, value: string | number | boolean) => {
+    const newToggles: ToonToggle[] = []
+    const exists = toggles.find(t => t.toonName === toonName)
+    if(!exists){
+      newToggles.push({
+        toonName,
+        showTasks: value as any,
+        newTaskName: '',
+        showComplete: false
+      })
+    }
+
+    for(const toggle of toggles){
+      if(toggle.toonName === toonName){
+        //@ts-ignore
+        toggle[prop]= value as any
+      }
+      newToggles.push(toggle)
+    }
+    setToggles(newToggles)
+  }
+
+  const moveToonToIndex = (toonName: string, index: number) => {
+    const currentIndex = toons.findIndex(t => t.name === toonName)
+    if (currentIndex === -1) return
+
+    const updated = [...toons]
+    const [moved] = updated.splice(currentIndex, 1)
+
+    const safeIndex = Math.max(0, Math.min(index, updated.length))
+    updated.splice(safeIndex, 0, moved)
+
+    setToons(updated)
+  }
+
+  const moveToonTaskToIndex = (toonName: string, taskName: string, index: number) => {
+    const currentIndex = tasks.findIndex(t => t.name === taskName)
+    if (currentIndex === -1) return
+    const updated = [...tasks]
+    const [moved] = updated.splice(currentIndex, 1)
+    
+    const safeIndex = Math.max(0, Math.min(index, updated.length))
+    updated.splice(safeIndex, 0, moved)
+    
+
+    setTasks(updated)
+  }
+
   return <div className="container">
     <div className="panel">
       <h1>Toon Planner</h1>
-      <div>
+      <div style={{fontSize: 'smaller'}}>
         Create custom tasks to utilize helpful auto-xp calculation with urns and deployables by adding some stats from RS.
       </div>
+      {toons?.map(toon => {
+        return <div>
+          <button className='primary-edit' onClick={()=> { window.location.hash = `${toon.name}`}}>{toon.name}</button>
+          <ul>
+            {tasks?.filter(t => t.toonName === toon.name)?.map(task => {
+              
+              return <li>
+                {toggles?.find(t => t.toonName === toon.name)?.showTasks === true ? <button className='primary-edit' onClick={()=> {window.location.hash = `#${toon.name}_${task.name}` }}>{task.name}</button> : task.name}
+                
+
+              </li>
+            })}
+          </ul>
+        </div>
+      })}
       <div>
         New Toon<br/>
         <div className="input-row">
@@ -125,47 +230,183 @@ export default function ToonPlanner(){
             placeholder="Enter toon name."
             value={newToonName}
             onChange={(e) => setNewToonName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addToon()}
           />
           <button className="primary" onClick={addToon}>
             Add
           </button>
         </div>
       </div>
-      {toons?.map(toon => {
+      <div id='top-toons'></div>
+      {toons?.map((toon, toonIndex) => {
+        const toonTasks = tasks.filter(task => task.toonName === toon.name)
+        const toonToggle = toggles?.find(toggle => toggle.toonName === toon.name)
+        const showTasks = typeof toonToggle?.showTasks === 'undefined' ? false : toonToggle.showTasks
+        const newTaskName = typeof toonToggle?.newTaskName === 'undefined' ? '' : toonToggle.newTaskName
+        return <div id={`${toon.name}`} key={`${toon.name}`}>
+          <hr/>
+          <br/>
+          {toonIndex !== 0 && <div className="input-row" style={{maxWidth: '350px'}}>
+            <input
+              id={`${toon.name}_index`}
+              type="text"
+              placeholder="Change postition."
+              value={toonIndex}
+              onChange={(e) => {moveToonToIndex(toon.name, +e.target.value)}}
+              style={{width: '50px', height: '20px'}}
+            />
+            <div style={{width: '350px', textAlign: 'center', fontSize: 'larger'}}>
+              {toon.name}
+            </div>
+              <button className='primary-edit' style={{width: '240px', maxHeight: '30px'}} onClick={() => {moveToonToIndex(toon.name, 0)}}>Move To TOP</button>
 
-        return <div>
-          <div>
-            {toon.name}
-          </div>
+          </div>}
+          
           <div>
             New Task<br/>
-            <div className="input-row">
+            <div className="input-row" style={{maxWidth: '350px'}}>
               <input
+              id={`${toon.name}_new-task`}
                 type="text"
                 placeholder="Enter task name."
-                value={newToonName}
-                onChange={(e) => setNewTaskName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addTask}
+                value={newTaskName}
+                onChange={(e) => updateToggles(toon.name, 'newTaskName', e.target.value)}
+                style={{width: '450px'}}
               />
               <button className="primary" onClick={() => {addTask(toon.name)}}>
                 Add
               </button>
+              <button className='primary-edit' onClick={() => {updateToggles(toon.name, 'showTasks', !showTasks)}}>{showTasks === true ? 'Hide' : 'Show'} {toonTasks.length} Task(s)</button>
             </div>
           </div>
-
           <ul className="list">
-            {tasks.filter(task => task.toonName === toon.name).map((task, i) => {
-
+            {showTasks === true && toonTasks.map((task, taskIndex) => {
+              let estimateMinutesToTarget = task.xpPerAction * task.actionsPerMinute
+              estimateMinutesToTarget = task.xpTarget / estimateMinutesToTarget
+              if(Number.isNaN(estimateMinutesToTarget)){
+                estimateMinutesToTarget = 0
+              }
+              const dateEst = DateTime.utc().toLocal().plus({minutes: estimateMinutesToTarget})
               return (
                 <li
-                  key={`${task.name}_${i}`}
-                  className="sub-list-item">
-                    <div>
-                      {toon.name}
+                  id={`${toon.name}_${task.name}`}  
+                  key={`${task.name}_${taskIndex}`}
+                  style={{fontSize: '.8em', paddingLeft: '5%', paddingRight: '5%', textAlign: 'center'}}
+                >
+                  <hr/>
+                  <a id={`${toon.name}_${task.name}`}  ></a>
+
+                  {taskIndex !== 0 && <div className="input-row" style={{maxWidth: '450px'}}>
+                        <input
+                          id={`${task.name}_index`}
+                          type="text"
+                          placeholder="Change postition."
+                          value={taskIndex}
+                          onChange={(e) => {moveToonTaskToIndex(toon.name, task.name, +e.target.value)}}
+                          style={{width: '50px', height: '20px'}}
+                        />
+                        <div style={{width: '450px', textAlign: 'center', fontSize: 'larger'}}>TASK: {task.name}</div>
+                        <button className='primary-edit' style={{width: '200px', maxHeight: '30px'}} onClick={() => {moveToonTaskToIndex(toon.name, task.name, 0)}}>Move To TOP</button>
+
+                      </div>}
+                  <div style={{display: 'flex', flexWrap: 'wrap', gap: '1em'}}>
+                    <div style={{width: '33%'}}>                 
+                      <div className="input-row" style={{maxWidth: '250px'}}>
+                        <div style={{width: '70px'}}>
+                          XP/Action
+                        </div>
+                        <input
+                          id={`${task.name}_task-xp-per-action`}
+                          type="text"
+                          placeholder="XP per Action"
+                          value={task.xpPerAction ?? 0}
+                          onChange={(e) => updateTask(task.name, 'xpPerAction', +e.target.value)}
+                          style={{width: '50px', height: '20px'}}
+                        />
+                        
+                      </div>
+                    
+                      <div className="input-row" style={{maxWidth: '250px'}}>
+                        <div style={{width: '70px'}}>
+                          Actions<br/>/Minute
+                        </div>
+                        <input
+                          id={`${task.name}_task-actions-per-minute`}
+                          type="text"
+                          placeholder="Actions per minute"
+                          value={task.actionsPerMinute ?? 0}
+                          onChange={(e) => updateTask(task.name, 'actionsPerMinute', +e.target.value)}
+                          style={{width: '50px', height: '20px'}}
+                        />
+                        
+                      </div>
+
+                    <div className="input-row" style={{maxWidth: '250px'}}>
+                      <div style={{width: '70px'}}>
+                        XP Left
+                      </div>
+                        <input
+                          id={`${task.name}_task-xp-target`}
+                          type="text"
+                          placeholder="XP Left to Target"
+                          value={task.xpTarget ?? 0}
+                          onChange={(e) => updateTask(task.name, 'xpTarget', +e.target.value)}
+                          style={{width: '75px', height: '20px'}}
+                        />
+                        
+                      </div>
                     </div>
+
+                    <div  style={{width: '33%'}}>
+                      <div style={{padding: '10px'}}>
+                        {estimateMinutesToTarget > 0 && <strong>{dateEst.toFormat('t')}</strong>} Est. End (Time)
+                      </div>
+                      <div style={{padding: '10px'}}>
+                        <strong>{estimateMinutesToTarget > 0 && dateEst.toFormat('dd-MMM-yyyy')}</strong> Est. End (Day)
+
+                      </div>
+                      <div style={{padding: '10px'}}>
+                        <strong>{task.xpPerAction?.toFixed(1) ?? 0}</strong> XP/Action
+
+                      </div>
+                      <div style={{padding: '10px'}}>
+                        <strong>{task.actionsPerMinute?.toFixed(1) ?? 0}</strong> Actions/Minute
+
+                      </div>
+                      <div style={{padding: '10px'}}>
+                        <strong>{task.xpTarget?.toFixed(1) ?? 0}</strong> XP Left of Target Level
+
+                      </div>
+                      <div style={{padding: '10px'}}>
+                        <strong>{estimateMinutesToTarget?.toFixed(1)}</strong> Estimated Minute(s) to Target
+                      </div>
+                    </div>
+
+                    <div style={{width: '30%'}}>
+                      <div className='button-row'>
+                        <div className='button-group'>
+                          <button className='primary'>Start Run</button>
+
+                        </div>
+                        <div className='button-group'>
+                          <button className='danger'>Delete Task</button>
+                          <div>
+                            {task.taskRuns?.map(taskRun => {
+                              return <div>
+                                {taskRun.createdDate}
+                                </div>
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className='button-row'>
+                        <div className='button-group'>
+                          <button className='primary'>Stop Run</button>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
                     <div>
-                      Fields to edit.
                     </div>
                 </li>
               )
