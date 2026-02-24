@@ -103,6 +103,9 @@ export default function ToonTasks() {
           <button className="primary-edit" onClick={() => {addTask(toon?.name as string)}}>
             Add
           </button>
+          <button className="primary-edit" onClick={() => {navigate('/toonPlanner')}}>
+            Toon list
+          </button>
         </div>
         <div className='button-group'>
           <button className="danger" onClick={() => {clearToonTasks(toon?.name as string)}}>
