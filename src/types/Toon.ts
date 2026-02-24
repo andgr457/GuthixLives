@@ -2,6 +2,7 @@ export interface Toon {
   name: string
 }
 
+export const TASK_STATUS: TaskStatus[] = ['pending', 'in-progress', 'complete']
 export type TaskStatus = 'pending' | 'in-progress' | 'complete'
 export interface Task {
   toonName: string

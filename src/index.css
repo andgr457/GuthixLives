@@ -27,6 +27,42 @@ body {
   padding: 2rem;
 }
 
+.container-item {
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.panel-item {
+  width: 100%;
+  background: var(--panel);
+  border: 3px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.input-row-item {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  height: 25px;
+  width: 80px;
+}
+
+.input-row-item input {
+  width: inherit;
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--panel-light);
+  border: 2px solid var(--gold-dark);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+}
+
 .panel {
   width: 100%;
   max-width: 70%;

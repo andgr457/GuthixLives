@@ -86,41 +86,7 @@ export default function ToonPlanner(){
     setNewToonName("");
   };
 
-  const addTask = (toonName: string) => {
-
-
-    const toggleValue = toggles?.find(t => t.toonName === toonName)?.newTaskName ?? ''
-    const trimmed = toggleValue.trim();
-    if (!trimmed) return;
-    const exists = tasks.filter(i => i.name.toLowerCase().includes(trimmed.toLowerCase()))
-
-    const newTask: Task = {
-      name: `${trimmed} [${exists.length + 1}]`,
-      toonName,
-      createdDate: DateTime.utc().toISO(),
-      status: 'pending',
-      taskRuns: [],
-      actionsPerMinute: 0,
-      xpPerAction: 0,
-      xpTarget: 0
-    }
-    const newTasks: Task[] = []
-    newTasks.push(newTask)
-    for(const task of tasks){
-      newTasks.push(task)
-    }
-    const newToggles: ToonToggle[] = []
-    for(const toggle of toggles){
-      if(toggle.toonName === toonName){
-        toggle.newTaskName = ''
-        toggle.showTasks = true
-      }
-      newToggles.push(toggle)
-    }
-    setTasks(newTasks)
-    setToggles(newToggles)
-    setNewTaskName("");
-  };
+  
 
   const addTaskRun = (taskName: string) => {
     const newTaskRun: TaskRun = {
@@ -201,27 +167,23 @@ export default function ToonPlanner(){
     setTasks(updated)
   }
 
+  const clearAll = () => {
+    if(!confirm('Are you sure you wish to delete all local data? Recommended to export before this.')) return
+    setToons([])
+    setTasks([])
+  }
+
   return <div className="container">
     <div className="panel">
       <h1>Toon Planner</h1>
       <div style={{fontSize: 'smaller'}}>
         Create custom tasks to utilize helpful auto-xp calculation with urns and deployables by adding some stats from RS.
       </div>
-      {toons?.map(toon => {
-        return <div>
-          <button className='primary-edit' onClick={()=> { window.location.hash = `${toon.name}`}}>{toon.name}</button>
-          <ul>
-            {tasks?.filter(t => t.toonName === toon.name)?.map(task => {
-              
-              return <li>
-                {toggles?.find(t => t.toonName === toon.name)?.showTasks === true ? <button className='primary-edit' onClick={()=> {window.location.hash = `#${toon.name}_${task.name}` }}>{task.name}</button> : task.name}
-                
-
-              </li>
-            })}
-          </ul>
+      <div className='button-row'>
+        <div className='button-group'>
+          <button className='danger' onClick={clearAll}>Clear All Data</button>
         </div>
-      })}
+      </div>
       <div>
         New Toon<br/>
         <div className="input-row">
@@ -243,25 +205,12 @@ export default function ToonPlanner(){
         const showTasks = typeof toonToggle?.showTasks === 'undefined' ? false : toonToggle.showTasks
         const newTaskName = typeof toonToggle?.newTaskName === 'undefined' ? '' : toonToggle.newTaskName
         return <div id={`${toon.name}`} key={`${toon.name}`}>
-          <hr/>
           <br/>
-          {toonIndex !== 0 && <div className="input-row" style={{maxWidth: '350px'}}>
-            <input
-              id={`${toon.name}_index`}
-              type="text"
-              placeholder="Change postition."
-              value={toonIndex}
-              onChange={(e) => {moveToonToIndex(toon.name, +e.target.value)}}
-              style={{width: '50px', height: '20px'}}
-            />
-            <div style={{width: '350px', textAlign: 'center', fontSize: 'larger'}}>
-              {toon.name}
-            </div>
-              <button className='primary-edit' style={{width: '240px', maxHeight: '30px'}} onClick={() => {moveToonToIndex(toon.name, 0)}}>Move To TOP</button>
-
-          </div>}
+          <button className='primary-edit' onClick={() => {navigate(`/toonTasks/${toon.name}`)}}>
+            {toon.name} {'-->'} {toonTasks.length} Task(s)
+          </button>
           
-          <div>
+          {/* <div>
             New Task<br/>
             <div className="input-row" style={{maxWidth: '350px'}}>
               <input
@@ -277,8 +226,8 @@ export default function ToonPlanner(){
               </button>
               <button className='primary-edit' onClick={() => {updateToggles(toon.name, 'showTasks', !showTasks)}}>{showTasks === true ? 'Hide' : 'Show'} {toonTasks.length} Task(s)</button>
             </div>
-          </div>
-          <ul className="list">
+          </div> */}
+          {/* <ul className="list">
             {showTasks === true && toonTasks.map((task, taskIndex) => {
               let estimateMinutesToTarget = task.xpPerAction * task.actionsPerMinute
               estimateMinutesToTarget = task.xpTarget / estimateMinutesToTarget
@@ -411,7 +360,7 @@ export default function ToonPlanner(){
                 </li>
               )
             })}
-          </ul>
+          </ul> */}
           
         </div>
       })}
