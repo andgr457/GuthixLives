@@ -66,6 +66,24 @@ export default function ToonTasks() {
     setToonTasks(newTasks)
   }
 
+  // const addTaskRun = (taskName: string) => {
+  //   const newTaskRun: TaskRun = {
+  //     createdDate: DateTime.utc().toISO(),
+  //     status: 'in-progress',
+  //     taskId: `${taskName}_${DateTime.utc().toMillis()}`,
+  //     xpGained: 0
+  //   }
+
+  //   const newTasks: Task[] = []
+  //   for(const task of tasks){
+  //     if(task.name === taskName){
+  //       task.taskRuns.push(newTaskRun)
+  //     }
+  //     newTasks.push(task)
+  //   }
+  //   setTasks(newTasks)
+  // };  
+
   return <div className="container-item">
     <div className='panel-item'>
       <span style={{fontSize: 'larger'}}>{toon?.name}</span> <span style={{fontSize: 'smaller'}}>{toonTasks?.length} total task(s)</span>
@@ -94,7 +112,7 @@ export default function ToonTasks() {
       </div>
         
     </div>
-    {toonTasks && toonTasks?.filter(tt => tt.toonName === toon?.name).map((task, taskIndex) => {
+    {toonTasks && toonTasks?.filter(tt => tt.toonName === toon?.name).map((task) => {
       let estimateMinutesToTarget = task.xpPerAction * task.actionsPerMinute
       estimateMinutesToTarget = task.xpTarget / estimateMinutesToTarget
       if(Number.isNaN(estimateMinutesToTarget)){
