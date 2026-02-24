@@ -1,5 +1,14 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function Home() {
-  
+  const navigate = useNavigate()
+
+  const nav = () => {
+    return <div>
+      <button className='primary-edit' onClick={() => {navigate('/toonPlanner')}}>Toon Planner</button>
+    </div>
+  }
+
   return <div className="container">
     <div className="panel">
       <h1>Guthix Lives</h1>
@@ -21,6 +30,10 @@ export default function Home() {
         knowledge and helping others progress. With members from all around the
         world, Guthix Lives is a welcoming and supportive community for
         everyone.
+      </p>
+
+      <p>
+        {nav()}
       </p>
     </div>
   </div>
