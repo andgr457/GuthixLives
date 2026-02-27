@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useRef } from "react";
 import {DateTime} from 'luxon'
-import { fetchGEItem } from "../services/geService";
-import type { GEItemData } from '../types/Item';
 import { useNavigate } from 'react-router-dom';
-import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../services/dates';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../../services/common/Dates.service';
+import { fetchGEItem } from '../../services/ge/GE.service';
+import type { GEItemData } from '../../types/Item';
 
 export default function GETracker() {
   const navigate = useNavigate();

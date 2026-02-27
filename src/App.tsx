@@ -1,11 +1,11 @@
 import { Routes, Route } from "react-router-dom";
-import GETracker from './pages/GETracker';
+import Events from './pages/events/Events';
+import GEPlanner from './pages/ge/GEPlanner';
+import GEPlannerItem from './pages/ge/GEPlannerItem';
+import GETracker from './pages/ge/GETracker';
 import Home from './pages/Home';
-import GEPlannerItem from './pages/GEPlannerItem';
-import GEPlanner from './pages/GEPlanner';
-import ToonPlanner from './pages/ToonPlanner';
-import ToonTasks from './pages/ToonTasks';
-import Events from './pages/Events';
+import ToonPlanner from './pages/toon/ToonPlanner';
+import ToonTasks from './pages/toon/ToonTasks';
 
 export default function App() {
   return (

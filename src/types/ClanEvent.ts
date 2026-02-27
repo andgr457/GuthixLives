@@ -1,4 +1,4 @@
-import type { Winner } from '../pages/EventSection';
+import type { Winner } from '../pages/events/EventSection';
 
 export interface ClanEvent {
   title: string;

@@ -1,6 +1,6 @@
 import React from "react";
-import "../styles/Event.css";
-import "../styles/Podium.css";
+import "../../styles/Event.css";
+import "../../styles/Podium.css";
 import { EventImages } from './EventImages';
 
 export interface LateArrival {
@@ -38,7 +38,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
     <section style={{textAlign: 'center'}}>
       <h2 className="event-title">{title}</h2>
 
-      <p style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "12px", textAlign: "center" }}>
+      <p style={{ fontSize: "1.3rem", color: "#aaa", marginTop: "12px", textAlign: "center" }}>
         {eventDate}
       </p>
 

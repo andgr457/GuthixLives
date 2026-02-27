@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import type { ClanEvent } from './ClanEvent.interfaces';
+import type { ClanEvent } from '../../types/ClanEvent';
 
 export const FASTIONSCAPE_1_EVENT: ClanEvent = {
-  title: "👑 Guthix Lives – First Ever Fashionscape! 👑",
+  title: "👑 Guthix Lives - February Fashionscape! 👑",
   description:
     "Our very first Clan Fashionscape lit up Varrock Square — and what a turnout it was!",
   participants: [

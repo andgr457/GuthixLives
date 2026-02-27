@@ -1,6 +1,6 @@
-import type { ClanEvent } from '../services/ClanEvent.interfaces';
+import type { ClanEvent } from '../../types/ClanEvent';
 import { EventSection } from './EventSection';
-import { FASTIONSCAPE_1_EVENT } from '../services/events.data';
+import { FASTIONSCAPE_1_EVENT } from '../../services/events/Events.data';
 
 export default function Events() {
   // Define events data
