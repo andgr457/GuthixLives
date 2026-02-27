@@ -1,4 +1,4 @@
-import type { PlannerItem } from '../types/Plans'
+import type { PlannerItem } from '../../types/Plans'
 
 export function getDefaultPlannerFieldEditMap(
   itemPlans: PlannerItem[]

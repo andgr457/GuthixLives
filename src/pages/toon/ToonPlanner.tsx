@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { DateTime } from 'luxon';
-import type { Toon, Task } from '../types/Toon';
+import type { Toon, Task } from '../../types/Toon';
 import { useNavigate } from 'react-router-dom';
 
 export default function ToonPlanner(){
