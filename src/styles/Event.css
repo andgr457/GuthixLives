@@ -1,0 +1,99 @@
+/* General Event Container */
+.event-section {
+  background: linear-gradient(to bottom, #1a1a1a, #000);
+  color: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 191, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.event-title {
+  font-size: 2em;
+  font-weight: bold;
+  color: #FFC107;
+  margin-bottom: 16px;
+}
+
+.event-paragraph {
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: #ccc;
+  letter-spacing: 1px;
+
+}
+
+.event-highlight-amber {
+  color: #FFC107;
+  font-weight: bold;
+}
+
+.event-highlight-green {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.event-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: #ddd;
+  list-style: none;
+  padding: 0;
+  letter-spacing: 1px;
+}
+
+.event-latearrival {
+  text-align: center;
+  border-top: 1px solid rgba(255, 191, 0, 0.2);
+  padding-top: 16px;
+  margin-bottom: 24px;
+  color: #ccc;
+  font-style: italic;
+}
+
+.event-latearrival .highlight {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #FFC107;
+  margin-top: 8px;
+}
+
+.event-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 1.3rem;
+  color: #888;
+}
+
+
+.image-winner img {
+  width: 20vh!important;
+  border-radius: 8px;
+}
+
+/* Desktop: larger images */
+@media(min-width: 10vh) {
+  .image-winner img {
+    width: 30vh!important;
+    cursor: pointer;
+  }
+}
+
+.event-images img {
+  width: 30vh;
+  border-radius: 8px;
+}
+
+/* Desktop: larger images */
+@media(min-width: 80vh) {
+  .event-images img {
+    width: 80vh;
+    margin-right: 12px;
+    cursor: pointer;
+  }
+}

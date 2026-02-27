@@ -1,0 +1,43 @@
+/* Podium Container */
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap; /* optional for small screens */
+}
+
+/* Generic podium block */
+.podium-block {
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12px;
+}
+
+/* Specific podium sizes */
+.podium-1 { width: 20vh; height: 20vh; }
+.podium-2 { width: 20vh; height: 16vh; }
+.podium-3 { width: 20vh; height: 13vh; }
+
+.podium-title {
+  font-size: 0.8rem;
+  color: #aaa;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.podium-name {
+  font-weight: bold;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.podium-1 .podium-name { color: #FFC107; font-size: larger; }
+.podium-2 .podium-name { color: #b3b3b3; }
+.podium-3 .podium-name { color: #b67d1a; }

@@ -5,11 +5,13 @@ import GEPlannerItem from './pages/GEPlannerItem';
 import GEPlanner from './pages/GEPlanner';
 import ToonPlanner from './pages/ToonPlanner';
 import ToonTasks from './pages/ToonTasks';
+import Events from './pages/Events';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path='/events' element={<Events />} />
       <Route path="/toonPlanner" element={<ToonPlanner />} />
       <Route path="/getracker" element={<GETracker />} />
       <Route path='/geplanner' element={<GEPlanner />} />

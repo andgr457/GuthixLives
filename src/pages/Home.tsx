@@ -1,40 +1,36 @@
-import { useNavigate } from 'react-router-dom'
-
 export default function Home() {
-  const navigate = useNavigate()
-
-  const nav = () => {
-    return <div>
-      <button className='primary-edit' onClick={() => {navigate('/toonPlanner')}}>Toon Planner</button>
+  return <div className="container-item">
+    <div className="panel-item">
+      <div className='site-title'>Guthix Lives</div>
     </div>
-  }
+    <div className='panel-item' style={{textAlign: 'center', letterSpacing: '1px'}}>
+      <div style={{paddingLeft: '2em', paddingRight: '2em'}}>
+        <p>
+          We're a <strong>RuneScape 3</strong> social community that has been
+          going strong for over 13 years.
+        </p>
 
-  return <div className="container">
-    <div className="panel">
-      <h1>Guthix Lives</h1>
+        <p>
+          Founded on September 24, 2013, our clan focuses on helping new and
+          returning players with support, encouragement, and advice — whether
+          that's exploring new content, training more efficiently, earning more
+          GP, or simply having more fun.
+        </p>
 
-      <p>
-        We're a <strong>RuneScape 3</strong> social community that has been
-        going strong for over 13 years.
-      </p>
+        <p>
+          We're also home to experienced players who enjoy sharing their
+          knowledge and helping others progress. With members from all around the
+          world, Guthix Lives is a welcoming and supportive community for
+          everyone.
+        </p>
 
-      <p>
-        Founded on September 24, 2013, our clan focuses on helping new and
-        returning players with support, encouragement, and advice — whether
-        that's exploring new content, training more efficiently, earning more
-        GP, or simply having more fun.
-      </p>
+        <p>
+          ~ Unknown
+        </p>
 
-      <p>
-        We're also home to experienced players who enjoy sharing their
-        knowledge and helping others progress. With members from all around the
-        world, Guthix Lives is a welcoming and supportive community for
-        everyone.
-      </p>
+      </div>
 
-      <p>
-        {nav()}
-      </p>
+      <img src='img/guthix.svg'></img>
     </div>
   </div>
 }
