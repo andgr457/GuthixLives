@@ -29,8 +29,10 @@ export default function Home() {
         </p>
 
       </div>
+      <div style={{color: '#fff'}}>
+        <img src='img/guthix.svg'></img>
 
-      <img src='img/guthix.svg'></img>
+      </div>
     </div>
   </div>
 }
