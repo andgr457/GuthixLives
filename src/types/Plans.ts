@@ -21,6 +21,7 @@ export interface PlannerItem {
   amount?: number
   boughtPrice?: number
   soldPrice?: number
+  isTaxed?: boolean
   createdOn?: string
   updatedOn?: string
   completedOn?: string
