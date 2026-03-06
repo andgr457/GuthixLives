@@ -109,7 +109,8 @@ export default function GEPlannerItem() {
       status: 'draft',
       createdOn: DateTime.utc().toISO(),
       category: defaultCategory,
-      subCategory: defaultSubCategory
+      subCategory: defaultSubCategory,
+      isTaxed: true
     }
     newItems.push(newItem)
     newItems.push(...itemPlans)
@@ -158,7 +159,7 @@ export default function GEPlannerItem() {
     if(typeof itemPlan.boughtPrice === 'number'){
       if(typeof itemPlan.amount === 'number'){
         if(typeof itemPlan.soldPrice === 'number'){
-          const taxAmount = Math.floor(itemPlan.soldPrice * FLAT_TAX)
+          const taxAmount = Math.ceil((itemPlan?.isTaxed) ?? true ? itemPlan.soldPrice * FLAT_TAX : 0) //rs gives the extra decimal amount to player as 1 gp
           profit = ((itemPlan.soldPrice - taxAmount) - itemPlan.boughtPrice) * itemPlan.amount
         }
       }
@@ -220,6 +221,18 @@ export default function GEPlannerItem() {
     const newPlans = itemPlans.map(ip => {
       if(ip.planId === planId){
         ip.soldPrice = price
+        ip.updatedOn = DateTime.utc().toISO()
+      }
+      return ip
+    })
+
+    setItemPlans(newPlans)
+  }
+
+  const setItemPlanIsTaxed = (planId: string, value: boolean) => {
+    const newPlans = itemPlans.map(ip => {
+      if(ip.planId === planId){
+        ip.isTaxed = value
         ip.updatedOn = DateTime.utc().toISO()
       }
       return ip
@@ -536,7 +549,8 @@ export default function GEPlannerItem() {
               let calcMade = 0
               if(typeof ip.amount === 'number' && typeof ip.boughtPrice === 'number' && typeof ip.soldPrice === 'number'){
                 showCalculation = true
-                const taxAmount = ip.soldPrice * FLAT_TAX
+                const taxAmount = Math.ceil((ip?.isTaxed) ?? true ? ip.soldPrice * FLAT_TAX : 0)
+
                 calcMade = ((ip.soldPrice - taxAmount) - ip.boughtPrice) * ip.amount
               }
 
@@ -728,6 +742,10 @@ export default function GEPlannerItem() {
                         </tr>
                       </tbody>
                     </table>
+                  </div>
+                  <div>
+                    <label>Taxable?</label>
+                    <input type='checkbox' checked={ip?.isTaxed ?? true} onChange={() => {setItemPlanIsTaxed(ip.planId, !(ip?.isTaxed ?? true))}}></input>
                   </div>
                   {showCalculation && <div>
                     <div style={{textAlign: 'center'}}>
