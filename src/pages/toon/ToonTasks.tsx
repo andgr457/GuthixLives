@@ -84,8 +84,8 @@ export default function ToonTasks() {
   //   setTasks(newTasks)
   // };  
 
-  return <div className="container-item">
-    <div className='panel-item'>
+  return <div>
+    <div>
       <span style={{fontSize: 'larger'}}>{toon?.name}</span> <span style={{fontSize: 'smaller'}}>{toonTasks?.length} total task(s)</span>
       <hr/>
       <div className="input-row">
@@ -116,12 +116,25 @@ export default function ToonTasks() {
         
     </div>
     {toonTasks && toonTasks?.filter(tt => tt.toonName === toon?.name).map((task) => {
-      let estimateMinutesToTarget = task.xpPerAction * task.actionsPerMinute
-      estimateMinutesToTarget = task.xpTarget / estimateMinutesToTarget
-      if(Number.isNaN(estimateMinutesToTarget)){
-        estimateMinutesToTarget = 0
+      // XP per minute
+      const xpPerMinute = task.xpPerAction * task.actionsPerMinute;
+
+      // Minutes to target
+      let estimateMinutesToTarget = task.xpTarget / xpPerMinute;
+
+      if (Number.isNaN(estimateMinutesToTarget) || !Number.isFinite(estimateMinutesToTarget)) {
+        estimateMinutesToTarget = 0;
       }
-      const dateEst = DateTime.utc().toLocal().plus({minutes: estimateMinutesToTarget})
+
+      // Kills (actions) remaining
+      let killsRemaining = Math.ceil(task.xpTarget / task.xpPerAction);
+
+      if (Number.isNaN(killsRemaining) || !Number.isFinite(killsRemaining)) {
+        killsRemaining = 0;
+      }
+
+      // Estimated completion date
+      const dateEst = DateTime.utc().toLocal().plus({ minutes: estimateMinutesToTarget });
       return <div className='panel-item'>
         <div>
           <a id={`${toon?.name}_${task.name}`}></a>
@@ -221,8 +234,8 @@ export default function ToonTasks() {
           <div>
             Estimation<br/>
             <strong>{estimateMinutesToTarget?.toFixed(1)}</strong> total minute(s)<br/>
-            <strong>{estimateMinutesToTarget > 0 ? dateEst.toFormat('dd-MMM-yyyy') : '??'}</strong> at <strong>{estimateMinutesToTarget > 0 ? dateEst.toFormat('t') : '??'}</strong> 
-
+            <strong>{estimateMinutesToTarget > 0 ? dateEst.toFormat('dd-MMM-yyyy') : '??'}</strong> at <strong>{estimateMinutesToTarget > 0 ? dateEst.toFormat('t') : '??'}</strong><br/>
+            <strong>{killsRemaining} kill(s) remaining.</strong>
           </div>
         </div>        
       </div>

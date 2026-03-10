@@ -80,8 +80,8 @@ export default function ToonPlanner(){
     setTasks([])
   }
 
-  return <div className="container">
-    <div className="panel">
+  return <div>
+    <div>
       <h1>Toon Planner</h1>
       <div style={{fontSize: 'smaller'}}>
         Create custom tasks to utilize helpful auto-xp calculation with urns and deployables by adding some stats from RS.
