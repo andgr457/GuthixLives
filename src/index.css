@@ -12,6 +12,7 @@
   box-sizing: border-box;
 }
 
+
 .app-main {
   padding-top: 65px;
   
@@ -19,26 +20,26 @@
 
 .app-main a {
   text-decoration: none;
-  color:#1e2f22;
+  color:#52a265;
   height: 100vh;
 }
 
 .app-main a:hover {
   text-decoration: none;
-  color:#1e2f22;
+  color:#3c7c4b;
 }
 
 .parchment {
   font-size: 1em;
   letter-spacing: 1px;
-  padding: 1.5em;
+  padding: 1em;
   margin: 12px;
   border-radius: 6px;
-  margin-left: 25%;
-  margin-right: 25%;
+  margin-left: 15%;
+  margin-right: 15%;
   text-align: center;
-  background-color: #e6b844c8;
-  color: #3b2f1b;
+  background-color: #3b2f1b;
+  color: #e6b844c8;
 }
 
 @keyframes parchmentShift {

@@ -19,7 +19,7 @@ export default function Events() {
       })}
     </div>
     {events.map((event, index) => (
-      <div id={`${event.id}_${index}`} className='parchment' style={{marginLeft: '5%', marginRight: '5%'}} key={`${index}_${event.title}`}>
+      <div id={`${event.id}_${index}`} className='parchment' key={`${index}_${event.title}`}>
         {/* Render the EventSection component */}
         <EventSection
           title={event.title}

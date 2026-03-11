@@ -182,7 +182,7 @@ export default function GETracker() {
         </div>
         
       </div>
-      <div className='parchment inner-parchment' style={{  display: "flex", gap: "0.5rem" }}>
+      <div className='parchment'>
         
         <button className="primary" onClick={exportItems}>
           Export
@@ -216,27 +216,21 @@ export default function GETracker() {
           Clear All History
         </button>
       </div>
+      
 
-      <div className="parchment inner-parchment">
+      <div className="ge-item-list">
           {items.map((item, index) => (
             <>
-            <div key={index}>
-              <table style={{width: '100%', tableLayout: 'auto'}}>
-                <tbody>
-                  <tr>
-                    <td style={{width: '50%'}}>
-                      {item.name} 
-                    </td>
-                    <td style={{letterSpacing: '2px'}}>
-                      {item.price ? `${item.price.toLocaleString()} GP` : ''}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="button-row">
+            <div className='ge-item'>
+              <div className='ge-item-header'>
+                {item.name}
+              </div>
+              <div>
+                {item.price?.toLocaleString() ?? 'Unknown'} GP
+              </div>
+              <div className="button-row" style={{}}>
                 {/* Left-side buttons */}
-                <div className="button-group">
+                <div>
                   <button
                     className="primary"
                     onClick={() => refreshOne(item.name as string)}
@@ -258,7 +252,7 @@ export default function GETracker() {
                 </div>
 
                 {/* Right-side danger buttons */}
-                <div className="button-group">
+                <div>
                   <button
                     className="danger"
                     onClick={() => removeItem(item.name)}
@@ -273,10 +267,9 @@ export default function GETracker() {
                   </button>
                 </div>
               </div>
-
             </div>
             {showHistory?.get(item.name) === true && (
-              <div className="parchment inner-parchment">
+              <div className="ge-item-list">
                 {history
                   .filter((h) => h.name === item.name)
                   .map((h, i) => {
@@ -287,7 +280,7 @@ export default function GETracker() {
                     return (
                       <div
                         key={`${item.name}_${i}`}
-                        className="parchment inner-parchment"
+                        className="ge-item"
                       >
                         <table style={{ width: "100%", tableLayout: 'auto' }}>
                           <tbody>

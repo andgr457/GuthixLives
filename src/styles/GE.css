@@ -1,5 +1,17 @@
 
-.inner-parchment {
+.ge-item-list {
   margin-left: 0; 
   margin-right: 0;
+}
+
+.ge-item {
+  margin-top: 5px;
+  background-color: #977811;
+  padding: 1em;
+  color: black;
+  border-radius: 1em;
+}
+
+.ge-item-header {
+  font-size: 1.5em;
 }
