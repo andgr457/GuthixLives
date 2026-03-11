@@ -1,6 +1,7 @@
 import type { Winner } from '../pages/events/EventSection';
 
 export interface ClanEvent {
+  id: string
   title: string;
   description?: string;
   participants?: string[];

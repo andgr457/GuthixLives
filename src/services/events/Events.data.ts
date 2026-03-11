@@ -1,19 +1,20 @@
 import { DateTime } from 'luxon';
 import type { ClanEvent } from '../../types/ClanEvent';
 
-export const FASTIONSCAPE_1_EVENT: ClanEvent = {
+export const FASHIONSCAPE_1_EVENT: ClanEvent = {
+  id: 'fashion-1',
   title: "February Fashionscape",
   description:
     "Our very first Clan Fashionscape lit up Varrock Square — and what a turnout it was!",
   participants: [
-    "👑 Tessa Cero",
-    "✨ Frostbit",
-    "🛡️ Dwarf Cut",
-    "🔥 Anub'Nerevar",
-    "👑 Lord Meggedo",
-    "⚡ Wolf of Odin",
-    "🏹 Kingz Bow",
-    '🗡️ Hint'
+    "Tessa Cero",
+    "Frostbit",
+    "Dwarf Cut",
+    "Anub'Nerevar",
+    "Lord Meggedo",
+    "Wolf of Odin",
+    "Kingz Bow",
+    'Hint'
   ],
   winners: [
     { position: 1, title: "Grand Champion", name: "Hint" },

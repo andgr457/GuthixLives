@@ -19,11 +19,17 @@
 
 .app-main a {
   text-decoration: none;
-  color:#f5d574;
+  color:#1e2f22;
+  height: 100vh;
+}
+
+.app-main a:hover {
+  text-decoration: none;
+  color:#1e2f22;
 }
 
 .parchment {
-  font-size: 1.25em;
+  font-size: 1em;
   letter-spacing: 1px;
   padding: 1.5em;
   margin: 12px;

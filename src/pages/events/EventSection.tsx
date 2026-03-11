@@ -34,15 +34,16 @@ export const EventSection: React.FC<EventSectionProps> = ({
   images,
   footer
 }) => {
+  const winner = winners?.find(w => w.position === 1)
   return (
-    <section style={{textAlign: 'center'}}>
+    <div style={{textAlign: 'center'}}>
       <div className="event-title">
         {title}
         <div style={{fontWeight: 'bolder', fontSize: '0.75em'}}>
           {eventDate}
         </div>
       </div>
-      
+
       <div>
         {description}
       </div>
@@ -60,11 +61,10 @@ export const EventSection: React.FC<EventSectionProps> = ({
 
       {winners && winners.length > 0 && (
         <div>
-          <h3 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#FFC107", marginBottom: "16px" }}>
-            🏆 Winners 🏆
-          </h3>
-          <div>
-            
+          <div className="event-title">
+            Winners
+          </div>
+          <div>            
             {winners.map((w) => (
               <div>
                 {w.name} <strong>{w.title}</strong>
@@ -74,7 +74,7 @@ export const EventSection: React.FC<EventSectionProps> = ({
         </div>
       )}
 
-      {images && images.length > 0 && (<p className='image-winner'>
+      {images && images.length > 0 && (<p title={winner?.name} className='image-winner'>
         <EventImages images={images.filter(i => i.includes('-winner'))} />
       </p>)}
 
@@ -88,6 +88,6 @@ export const EventSection: React.FC<EventSectionProps> = ({
         </div>
       )}
 
-    </section>
+    </div>
   );
 };

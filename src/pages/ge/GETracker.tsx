@@ -6,6 +6,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../../services/common/Dates.service';
 import { fetchGEItem } from '../../services/ge/GE.service';
 import type { GEItemData } from '../../types/Item';
+import '../../styles/GE.css'
 
 export default function GETracker() {
   const navigate = useNavigate();
@@ -162,12 +163,12 @@ export default function GETracker() {
   }
 
   return (
-    <div className="container">
-      <div className="panel">
-        <h1>GE Tracker</h1>
-
+    <div className="parchment" style={{marginLeft: '1em', marginRight: '1em'}}>
+      <div className='event-title'>GE Tracker</div>
+      <div className='parchment inner-parchment'>
+        <div>
           New Item Name (exact spacing)<br/>
-        <div className="input-row">
+        
           <input
             type="text"
             placeholder="Enter item name. Auto-formats for RS naming."
@@ -179,48 +180,48 @@ export default function GETracker() {
             Add
           </button>
         </div>
+        
+      </div>
+      <div className='parchment inner-parchment' style={{  display: "flex", gap: "0.5rem" }}>
+        
+        <button className="primary" onClick={exportItems}>
+          Export
+        </button>
+        <button
+          className="primary"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Import
+        </button>
 
-        <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
-          
-          <button className="primary" onClick={exportItems}>
-            Export
-          </button>
+        <input
+          type="file"
+          accept="application/json"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={importItems}
+        />
 
-          <button
-            className="primary"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Import
-          </button>
+        <button
+          className="primary"
+          onClick={handleDashboardClicked}
+        >
+          Planner Dashboard
+        </button>
 
-          <input
-            type="file"
-            accept="application/json"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={importItems}
-          />
-
-          <button
-            className="primary"
-            onClick={handleDashboardClicked}
-          >
-            Planner Dashboard
-          </button>
-
-          <div style={{fontSize: 'smaller'}}>
-            History only stores when prices change from currently stored values.
-          </div>
-          <button className="danger" onClick={clearAllHistory}>
-            Clear All History
-          </button>
+        <div style={{fontSize: 'smaller'}}>
+          History only stores when prices change from currently stored values.
         </div>
+        <button className="danger" onClick={clearAllHistory}>
+          Clear All History
+        </button>
+      </div>
 
-        <ul className="list">
+      <div className="parchment inner-parchment">
           {items.map((item, index) => (
             <>
-            <li key={index} className="list-item">
-              <table style={{width: '100%'}}>
+            <div key={index}>
+              <table style={{width: '100%', tableLayout: 'auto'}}>
                 <tbody>
                   <tr>
                     <td style={{width: '50%'}}>
@@ -232,7 +233,6 @@ export default function GETracker() {
                   </tr>
                 </tbody>
               </table>
-              <hr />
 
               <div className="button-row">
                 {/* Left-side buttons */}
@@ -274,9 +274,9 @@ export default function GETracker() {
                 </div>
               </div>
 
-            </li>
+            </div>
             {showHistory?.get(item.name) === true && (
-              <ul className="list">
+              <div className="parchment inner-parchment">
                 {history
                   .filter((h) => h.name === item.name)
                   .map((h, i) => {
@@ -285,11 +285,11 @@ export default function GETracker() {
                     );
 
                     return (
-                      <li
+                      <div
                         key={`${item.name}_${i}`}
-                        className="sub-list-item"
+                        className="parchment inner-parchment"
                       >
-                        <table style={{ width: "100%" }}>
+                        <table style={{ width: "100%", tableLayout: 'auto' }}>
                           <tbody>
                             <tr>
                               <td>{h.name}</td>
@@ -312,15 +312,14 @@ export default function GETracker() {
                             </tr>
                           </tbody>
                         </table>
-                      </li>
+                      </div>
                     );
                   })}
-              </ul>
+              </div>
             )}
 
             </>
           ))}
-        </ul>
       </div>
     </div>
   );
