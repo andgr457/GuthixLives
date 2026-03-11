@@ -10,7 +10,7 @@
 
 /* Generic podium block */
 .podium-block {
-  background-color: #333;
+  background-color: #c18a00;
   border: 1px solid #555;
   border-radius: 12px;
   display: flex;
@@ -39,5 +39,5 @@
 }
 
 .podium-1 .podium-name { color: #FFC107; font-size: larger; }
-.podium-2 .podium-name { color: #b3b3b3; }
-.podium-3 .podium-name { color: #b67d1a; }
+.podium-2 .podium-name { color: #000000; }
+.podium-3 .podium-name { color: #000000; }

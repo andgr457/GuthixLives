@@ -8,8 +8,12 @@ import PublicNavigationMenu from './pages/PublicNav';
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <PublicNavigationMenu/>
-      <App />
+      <div >
+        <PublicNavigationMenu/>
+      </div>
+      <div className='app-main'>
+        <App />
+      </div>
     </BrowserRouter>
   </React.StrictMode>
 );

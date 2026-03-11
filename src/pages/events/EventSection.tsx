@@ -36,15 +36,16 @@ export const EventSection: React.FC<EventSectionProps> = ({
 }) => {
   return (
     <section style={{textAlign: 'center'}}>
-      <h2 className="event-title">{title}</h2>
-
-      <p style={{ fontSize: "1.3rem", color: "#aaa", marginTop: "12px", textAlign: "center" }}>
-        {eventDate}
-      </p>
-
-      <p className='event-paragraph'>
+      <div className="event-title">
+        {title}
+        <div style={{fontWeight: 'bolder', fontSize: '0.75em'}}>
+          {eventDate}
+        </div>
+      </div>
+      
+      <div>
         {description}
-      </p>
+      </div>
 
       <p className='event-paragraph'>
         A very special thanks to the clan members that joined!
@@ -62,13 +63,11 @@ export const EventSection: React.FC<EventSectionProps> = ({
           <h3 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#FFC107", marginBottom: "16px" }}>
             🏆 Winners 🏆
           </h3>
-          <div className="podium-container">
-            {winners.map((w, i) => (
+          <div>
+            
+            {winners.map((w) => (
               <div>
-                <div key={i} className={`podium-block podium-${w.position}`}>
-                  <p className="podium-name">{w.name}</p>
-                  <p className="podium-title">{w.title}</p>
-                </div>
+                {w.name} <strong>{w.title}</strong>
               </div>
             ))}
           </div>
@@ -79,9 +78,9 @@ export const EventSection: React.FC<EventSectionProps> = ({
         <EventImages images={images.filter(i => i.includes('-winner'))} />
       </p>)}
 
-      <p className="event-footer">
+      <div>
         {footer}
-      </p>
+      </div>
 
       {images && images.length > 0 && (
         <div className="event-images">

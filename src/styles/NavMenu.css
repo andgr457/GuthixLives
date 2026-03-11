@@ -1,0 +1,40 @@
+
+.nav {
+  background-color: #1e2f22;
+  position: fixed;
+  width: 100%;
+  z-index: 50;
+  font-size: larger;
+}
+
+.nav-content {
+  padding: 10px;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+}
+
+.nav-header {
+  color: #FFD700;
+  text-decoration: none;
+}
+
+.nav-header-menu {
+  display: flex;
+  gap: 2em;
+  font-weight: bold;
+  font-size: 1.25em;
+  margin-left: 15px;
+}
+
+.nav-item {
+  color: #FFD700;
+  text-decoration: none;
+  padding: 8px;
+
+}
+
+.nav-item:hover {
+  background-color: #ffd90048;
+  /* color: black; */
+}

@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import type { ClanEvent } from '../../types/ClanEvent';
 
 export const FASTIONSCAPE_1_EVENT: ClanEvent = {
-  title: "👑 Guthix Lives - February Fashionscape! 👑",
+  title: "February Fashionscape",
   description:
     "Our very first Clan Fashionscape lit up Varrock Square — and what a turnout it was!",
   participants: [
@@ -16,8 +16,8 @@ export const FASTIONSCAPE_1_EVENT: ClanEvent = {
     '🗡️ Hint'
   ],
   winners: [
-    { position: 2, title: "2nd Place", name: "Wolf of Odin" },
     { position: 1, title: "Grand Champion", name: "Hint" },
+    { position: 2, title: "2nd Place", name: "Wolf of Odin" },
     { position: 3, title: "3rd Place", name: "Lord Meggedo & Dwarf Cut" },
   ],
   date: DateTime.fromObject({
