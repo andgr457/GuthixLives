@@ -2,7 +2,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useCallback, useRef, useState } from 'react';
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction } from '../../types/Characters';
 import '../../styles/Characters.css'
-import { CharacterStorageKeys } from './CharactersStorageKeys';
+import { CharacterStorageKeys } from './CharactersConstants';
 import InfoSection from '../core/InfoSection';
 import { DateTime } from 'luxon';
 import AppErrorSection from '../core/AppErrorSection';

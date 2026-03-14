@@ -2,14 +2,14 @@ import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { Character, CharacterGEItem, CharacterGEItemHistory, GEItemGameVersion } from '../../types/Characters'
-import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
+import { CharacterStorageKeys } from './CharactersConstants'
 import { useKeyPress } from '../../hooks/useKeyPress'
 import AppErrorSection from '../core/AppErrorSection'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
 import InfoSection from '../core/InfoSection'
 
-export default function CharacterGEItems() {
+export default function CharacterGEItemPlanner() {
   const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
@@ -29,7 +29,6 @@ export default function CharacterGEItems() {
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
   const [search, setSearch] = useState('')
-  const [searchGame, setSearchGame] = useState('both')
   const [error, setError] = useState('')
 
   const handleEnterPress = () => {
@@ -45,8 +44,7 @@ export default function CharacterGEItems() {
       return
     }
 
-    const trimmed = newItemName.trim()
-    const itemName = trimmed[0].toUpperCase() + trimmed.slice(1).toLowerCase();
+    const itemName = newItemName.trim()
     const exists = geItems?.find(i => i.characterId === characterId && i.name?.toLowerCase() === itemName.toLowerCase())
     if(exists){
       setError('An item already exists with that name.')
@@ -58,7 +56,6 @@ export default function CharacterGEItems() {
         id: itemName,
         name: itemName,
         characterId: characterId as string,
-        geTimestamp: DateTime.utc().toISO(),
         gameVersion: newItemGameVersion as GEItemGameVersion
       }
   
@@ -69,9 +66,9 @@ export default function CharacterGEItems() {
   
       const newHistoryItems = []
       const historyItem: CharacterGEItemHistory = {
-        id: `H_${newItem.id}__${characterId}__${DateTime.now().toMillis()}`,
+        id: `H_${newItem.id}_${characterId}`,
         itemId: newItem.id as string,
-        geTimestamp: newItem.geTimestamp,
+        geTimestamp: DateTime.utc().toISO(),
         characterId: newItem.characterId,
         gameVersion: newItem.gameVersion,
         price: newItem.price,
@@ -88,48 +85,10 @@ export default function CharacterGEItems() {
 
       setGEItems(newItems)
       setGEItemHistory(newHistoryItems)
-      setNewItemName('')
     }catch(error){
       setError(`${JSON.stringify(error)}`)
     }
   }, [newItemName, geItems])
-
-  const handleItemRefresh = useCallback(async (itemId: string) => {
-    console.log(itemId)
-    const item = geItems?.find(i => i.id === itemId)
-    console.log(item)
-    if(!item) return
-
-    const geResponse = await fetchGEItem(item?.name as string, item?.gameVersion)
-    const updatedItem: CharacterGEItem = {
-      ...item,
-      price: geResponse.price,
-      volume: geResponse.volume,
-      geTimestamp: DateTime.now().toISO()
-    }
-    const historyItem: CharacterGEItemHistory = {
-      ...updatedItem,
-      id: `H_${updatedItem.id}_${characterId}__${DateTime.now().toMillis()}`,
-      itemId: item.id as string
-    }
-
-    const newItems = []
-    const newHistoryItems = []
-    for(const item of geItems){
-      if(item.id === itemId){
-        newItems.push(updatedItem)
-      } else {
-        newItems.push(item)
-      }
-    }
-    newHistoryItems.push(historyItem)
-    for(const history of geItemHistory){
-      newHistoryItems.push(history)
-    }
-
-    setGEItems(newItems)
-    setGEItemHistory(newHistoryItems)
-  }, [])
 
   return <div className='characters-app'>
     <div id='top'></div>
@@ -141,10 +100,7 @@ export default function CharacterGEItems() {
     </div>
     <br/>
     <div style={{textAlign: 'center'}}>
-      Characters&nbsp;
-      <button className='button-link' onClick={() => {navigate('/characters')}}>
-         Teleport
-      </button>
+      <button className='button-link' onClick={() => {navigate('/characters')}}>Back to Characters</button>
     </div>
     <br/>
     <div className='input-row-item' style={{width: '20em'}}>
@@ -195,84 +151,31 @@ export default function CharacterGEItems() {
         maxLength={16}
       />
     </div>
-
-    <div>
-      <button 
-        onClick={() => {setSearchGame('both')}} 
-        className={searchGame === 'both' ? 'primary selected' : 'primary'}
-      >
-        Both
-      </button>
-      <button 
-        onClick={() => {setSearchGame('rs')}} 
-        className={searchGame === 'rs' ? 'primary selected' : 'primary'}
-      >
-        RuneScape3
-      </button>
-      <button 
-        onClick={() => {setSearchGame('osrs')}} 
-        className={searchGame === 'osrs' ? 'primary selected' : 'primary'}
-      >
-        OSRS
-      </button>
-    </div>
     
     <div className='list'>
       {geItems?.map((item, index) => {
-        const historyItems = geItemHistory.filter(ih => ih.characterId === characterId && ih.itemId === item.id)
-
         let filteredOut = false
         if(search && search.length > 0){
           if(!item?.name?.toLowerCase().includes(search?.toLowerCase())){
             filteredOut = true
           }
         }
-        if(searchGame !== 'both'){
-          if(searchGame === 'osrs' && item.gameVersion !== 'osrs'){
-            filteredOut = true
-          } else if(searchGame === 'rs' && item.gameVersion !== 'rs'){
-            filteredOut = true
-          }
-        }
         return <div className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`} key={`${item.id}__${index}`}>
-          <div className='list-item-header'>
-            <div className='app-title'>
-              {item.name}
-            </div>
-            <div className='app-title smaller'>
-              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
-            </div>
+          <div className='app-title smaller'>
+            {item.name}
           </div>
           <InfoSection sectionTitle='GE' 
-            linkUrl={`/characters/${characterId}/ge/planner/${item.id}`}
+            linkUrl={`/characters/${characterId}/ge/${item.id}`}
             linkText={`Item Planner`}
-            button={{
-              className: 'primary',
-              onClick: () => {handleItemRefresh(item.id as string)},
-              text: 'Refresh'
-            }}
             items={[
             {
               title: 'Price',
-              value: `${item.price ? item.price.toLocaleString() : 0} GP`,
+              value: `${item.price ? item.price.toLocaleString() : 0}`,
             },
             {
               title: 'Volume',
               value: `${item.price ? item.price.toLocaleString() : 0}`,
-            },
-            {
-              title: 'Last Refresh',
-              value: `${DateTime.fromISO(item.geTimestamp as string).toLocal().toFormat('dd-MM-yy t')}`
-            }
-          ]} />
-          <InfoSection sectionTitle='History' 
-            linkUrl={`/characters/${characterId}/ge/history/${item.id}`}
-            linkText={`Teleport`}
-            items={[
-            {
-              title: 'Total',
-              value: `${historyItems?.length?.toLocaleString() ?? 0}`
-            }
+            } 
           ]} />
         </div>
       })}
