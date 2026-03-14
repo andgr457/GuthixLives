@@ -2,16 +2,13 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useCallback, useRef, useState } from 'react';
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction } from '../../types/Characters';
 import '../../styles/Characters.css'
-import { CharacterService } from '../../services/character/CharacterService';
 import { CharacterStorageKeys } from './CharactersStorageKeys';
 import InfoSection from '../core/InfoSection';
-import RSTextBoxAsForm from '../core/RSTextBoxAsForm';
-import RSTextBox from '../core/RSTextBox';
 import { DateTime } from 'luxon';
+import AppErrorSection from '../core/AppErrorSection';
 
 export default function CharacterList(){
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const characterService = new CharacterService()
 
   const [characters, setCharacters] = useLocalStorage<Character[]>(
     CharacterStorageKeys.Characters,
@@ -70,6 +67,7 @@ export default function CharacterList(){
   };
 
   const handleAddCharacterClicked = useCallback(() => {
+    console.log('handleAddCharacterClicked')
     console.log(newCharacterName)
     setError('')
     if(!newCharacterName || !newCharacterName.trim()) {
@@ -84,7 +82,14 @@ export default function CharacterList(){
       return
     }
 
-    const newCharacter: Character = characterService.generateNewCharacter(characterName)
+    const newCharacter: Character = {
+      id: `${newCharacterName}__${DateTime.now().toMillis()}`,
+      name: characterName,
+      showItemHistory: false,
+      showItemHistoryItemId: undefined,
+      showItemItemId: undefined,
+      showItems: false
+    }
     const newCharacters: Character[] = []
     newCharacters.push(newCharacter)
     for(const character of characters){
@@ -111,16 +116,12 @@ export default function CharacterList(){
 
   const handleDeleteDataByCharacterId = useCallback((characterId: string) => {
     console.log(characterId)
-    const c = characters?.find(c => c.id = characterId)
-    console.log(c)
-    alert(JSON.stringify(c))
-    if(!c) return
-    if(!confirm(`Are you sure you want to delete ${c?.name}? This cannot be undone and you should save an export.`)) return
-    const relatedItems = geItems?.filter(i => i.characterId === c?.id)
+    if(!confirm(`Are you sure you want to delete this? This cannot be undone and you should save an export.`)) return
+    const relatedItems = geItems?.filter(i => i.characterId === characterId)
     const itemIds = relatedItems?.map(i => i.id)
     const relatedHistory = geItemHistory?.filter(ih => itemIds.includes(ih.itemId))
     const historyIds = relatedHistory?.map(h => h.id)
-    const relatedTxns = transactions?.filter(t => t.characterId === c?.id)
+    const relatedTxns = transactions?.filter(t => t.characterId === characterId)
     const txnIds = relatedTxns?.map(t => t.id)
     
     const newTxns = []
@@ -149,7 +150,7 @@ export default function CharacterList(){
 
     const newCharacters = []
     for(const character of characters){
-      if(character.id === c?.id){
+      if(character.id === characterId){
         continue
       }
       newCharacters.push(character)
@@ -167,7 +168,7 @@ export default function CharacterList(){
       Characters
     </div>
 
-    <div className='flex-wrap-gap'>
+    <div style={{textAlign: 'center', display: 'flex', flexWrap: 'wrap', gap: '15px'}}>
       <div>
         <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
           {showDanger ? 'Hide' : 'Show'} Danger Zones
@@ -197,37 +198,38 @@ export default function CharacterList(){
     </div>
 
     <div className='characters-new'>
-      <RSTextBox 
-        label={{value: 'New Item Name'}}
-        showError={true}
-        textbox={{
-          id: `new_char_text`,
-          key: 'new_char_text',
-            onChange: (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {setNewCharacterName(e.currentTarget.value)},
-          placehoder: 'New character name...',
-          value: newCharacterName ?? ''
-        }}
-        button={{
-          className: 'primary',
-          onClick: handleAddCharacterClicked,
-          text: 'Add Item',
-        }}  
-      />
-      {typeof newCharacterName} {newCharacterName?.length ?? 0}
-      <RSTextBox 
-        showError={false}
-        errorMessage={error}
-        label={{
-          value: 'Filter Characters'
-        }}
-        textbox={{
-          id: `search_char_text`,
-          key: 'search_char_text',
-          onChange: (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {setSearch(e.currentTarget.value)},
-          placehoder: 'Search character name...',
-          value: search
-        }}
-      />
+      <div className='input-row-item' style={{width: '20em'}}>
+        <div className='rstextbox-title'>
+          New Character Name
+        </div>
+        <input 
+          onChange={(e) => {setNewCharacterName(e.target.value)}} 
+          type='text'
+          placeholder='Enter character name...'
+          value={newCharacterName ?? ''}
+          maxLength={16}
+        />
+        <button 
+          style={{padding: '5px', width: '188px'}}
+          className='primary'
+          onClick={() => {handleAddCharacterClicked()}}
+        >
+          Add <strong>{newCharacterName ?? ''}</strong>
+        </button>
+      </div>
+      <div>
+        
+        <AppErrorSection error={error} />
+      </div>
+      <div className='input-row-item'>
+        <input 
+          onChange={(e) => {setSearch(e.target.value)}} 
+          type='text'
+          placeholder='Enter character name...'
+          value={search ?? ''}
+          maxLength={16}
+        />
+      </div>
     </div>
     {showDanger && <div className='danger-zone'>
       <button className='danger' onClick={handleResetAllCharcters}>
@@ -261,7 +263,7 @@ export default function CharacterList(){
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
           <div className='app-title small left'>
-            {character.name} <span style={{fontSize: '10px'}}>{character.id}</span>
+            {character.name}<br/><span style={{fontSize: '10px'}}>ID: {character.id}</span>
           </div>
           <div className='flex-wrap-gap'>
             <InfoSection sectionTitle='GE' 
@@ -300,8 +302,8 @@ export default function CharacterList(){
               }
             ]} />
             
-            <div className='danger-zone'>              
-              <button className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
+            <div className='danger-zone' hidden={!showDanger}>              
+              <button key={`btnDeleteCharacter_${character.id}`} className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
                 <strong>DELETE</strong> {character.name} {character.id}
               </button>
             </div>

@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction } from '../../types/Characters'
 import { CharacterItemService } from '../../services/character/CharacterItemService'
 import { CharacterStorageKeys } from './CharactersStorageKeys'
-import RSTextBoxAsForm from '../core/RSTextBoxAsForm'
 import RSTextBox from '../core/RSTextBox'
 
 export default function CharacterGEItems() {

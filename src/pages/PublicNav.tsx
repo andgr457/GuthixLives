@@ -29,7 +29,7 @@ export default function PublicNavigationMenu() {
             <div onClick={() => setIsOpen(!isOpen)} style={{cursor: "pointer" }}>
               {isOpen ? "✕" : "☰"}
             </div>
-          <Link key={`home-link`} to={'/'} className='nav-header'>
+            <Link key={`home-link`} to={'/'} className='nav-header'>
               Guthix Lives
             </Link>
           </div>

@@ -18,6 +18,15 @@
 .nav-header {
   color: #FFD700;
   text-decoration: none;
+  text-shadow:
+  0 0 1px #FFD700
+  ,0 0 2px #fff
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 2px #FFD700
+  ;
 }
 
 .nav-header-menu {
@@ -32,6 +41,15 @@
   color: #FFD700;
   text-decoration: none;
   padding: 8px;
+  text-shadow:
+  0 0 1px #fff
+  ,0 0 2px #FFD700
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 2px #FFD700
+  ;
 
 }
 
