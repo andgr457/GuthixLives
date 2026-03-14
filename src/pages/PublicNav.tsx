@@ -23,16 +23,20 @@ export default function PublicNavigationMenu() {
 
   return (
     <nav className='nav'>
-      <div className='nav-content'>
+      <div className='nav-content' onClick={() => setIsOpen(!isOpen)} style={{cursor: "pointer" }}>
         {/* Logo & Hamburger Menu*/}
-        <div className='nav-header-menu'>
-            <div onClick={() => setIsOpen(!isOpen)} style={{cursor: "pointer" }}>
-              {isOpen ? "✕" : "☰"}
-            </div>
-            <Link key={`home-link`} to={'/'} className='nav-header'>
-              Guthix Lives
-            </Link>
+
+        <div className='flex-wrap-gap' style={{gap: '20px', fontSize: '24px', letterSpacing: '2px'}}>
+          <div onClick={() => setIsOpen(!isOpen)} >
+            {isOpen ? "✕" : "☰"}
           </div>
+          <div>
+            <Link key={`home-link`} to={'/'} className='nav-header'>
+            Guthix Lives
+          </Link>
+          </div>
+          
+        </div>
 
         {/* Desktop Menu */}
         <div className="desktop-menu" style={{ display: "none", gap: "24px" }}>
@@ -46,7 +50,7 @@ export default function PublicNavigationMenu() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div   style={{ display: "flex", flexDirection: "column", padding: "8px 16px", backgroundColor: "#1e1e2f" }}>
+        <div   style={{letterSpacing: '2px', display: "flex", flexDirection: "column", padding: "8px 16px", backgroundColor: "#1e1e2f" }}>
           {links.map((link) => (
             <Link
               key={link.name}

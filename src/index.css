@@ -16,19 +16,18 @@
   margin-top: 65px;
   height: 92vh;
   min-height: fit-content;
-  padding: 1em;
   border: #5ec77686 2px solid;
   border-radius: 10px;
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
   box-shadow: 0 0 5px #fff
-  ,0 0 10px #fff
+  ,0 0 5px #fff
   /* ,0 0 15px #FFD700
   ,0 0 20px #FFD700
   ,0 0 25px #FFD700
   ,0 0 30px #FFD700 */
-  ,0 0 15px #FFD700
+  ,0 0 5px #FFD700
   ;
 }
 
@@ -67,7 +66,6 @@
   font-size: 2em;
   color: #FFD700;
   background: #1e2f22;
-  margin: 10px;
   border-radius: 5px;
   text-shadow:
   0 0 1px #fff
@@ -78,6 +76,7 @@
   ,0 0 30px #FFD700 */
   ,0 0 6px #FFD700
   ;
+  cursor: pointer;
 }
 
 .app-title.smaller {
@@ -112,6 +111,8 @@
 .button-link:hover {
   text-decoration: none;
   color:#499c5c;
+  animation: shake .45s both infinite;
+
 }
 
 .clan-name {
@@ -126,17 +127,12 @@
 
 }
 
-.app-header-buttons {
-
-}
-
-
 .app-logo img {
   height: 40vh;
   background-color: rgba(127, 127, 127, 0.436);
   padding: 1em;
-  border: #FFD700 solid 2px;
-  border-radius: 20em;
+  border: #FFD700 solid 1px;
+  border-radius: 125px;
   box-shadow:
   0 0 1px #fff
   ,0 0 2px #FFD700
@@ -149,8 +145,29 @@
 
 }
 
+.glow {
+  background: radial-gradient(
+    circle at var(--mouseX) var(--mouseY),
+    rgba(255,255,255,0.2),
+    transparent 70px
+  );
+}
+
+.app-logo img:hover {
+  transform: scaleX(-1);
+  box-shadow:
+  0 0 1px #499c5c
+  ,0 0 2px #499c5c
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 5px #499c5c
+  ;
+}
+
 .basic-div {
-  font-size: 0.9em;
+  font-size: 1.2em;
   letter-spacing: 1px;
   padding: 1em;
   text-align: center;
@@ -377,6 +394,7 @@ button.primary:hover {
 button.danger {
   background: linear-gradient(to bottom, #b33, var(--danger));
   color: white;
+  font-weight: bolder;
 
   /* Make danger buttons smaller */
   padding: 0.25rem 0.75rem;
@@ -384,7 +402,7 @@ button.danger {
 }
 
 button.danger:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.9);
   animation: button-colorize-danger 1s ease-in-out infinite,
              shake 1s ease-in-out forwards;
 }
@@ -505,10 +523,9 @@ button.danger:hover {
   border-bottom: 2px solid #5a4a2f; /* OSRS-style border */
   box-shadow: 0 2px 4px rgba(0,0,0,0.3); /* subtle shadow */
 }
-
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateY(35px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
@@ -516,7 +533,4 @@ button.danger:hover {
   opacity: 1;
   transform: translateY(0);
 }
-
-.reveal:nth-child(1) { transition-delay: 0.05s; }
-.reveal:nth-child(2) { transition-delay: 0.15s; }
-.reveal:nth-child(3) { transition-delay: 0.25s; } 
+ 

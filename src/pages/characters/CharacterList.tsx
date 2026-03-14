@@ -7,8 +7,10 @@ import InfoSection from '../core/InfoSection';
 import { DateTime } from 'luxon';
 import AppErrorSection from '../core/AppErrorSection';
 import { useKeyPress } from '../../hooks/useKeyPress';
+import useScrollReveal from '../../hooks/useScrollReveal';
 
 export default function CharacterList(){
+  useScrollReveal()
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [characters, setCharacters] = useLocalStorage<Character[]>(
@@ -165,15 +167,19 @@ export default function CharacterList(){
     setCharacters(newCharacters)
   }, [characters, geItems, geItemHistory, transactions])
   
-  return <div className='characters-app'>
+  return <div className='characters-app reveal'>
     <div id='top'></div>
-    <div className='list-item-header'>
+        <div className='list-item-header'>
       <div className='app-title'>
-        Characters
+        Characters List
       </div>
+      <div className='app-title smaller' style={{fontSize: 'x-large'}}>
+       {characters?.length?.toLocaleString() ?? 0} Total
+      </div>
+
     </div>
 
-    <div className='flex-wrap-gap action-bar'>
+    <div className='flex-wrap-gap'>
       <div>
         <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
           {showDanger ? 'Hide' : 'Show'} Danger Zones
@@ -201,10 +207,9 @@ export default function CharacterList(){
         />
       </div>
     </div>
-
-    <div className='characters-new'>
-      <div className='input-row-item' style={{width: '20em'}}>
-        <div className='rstextbox-title'>
+    <div className='flex-wrap-gap'>
+      <div>
+        <div>
           New Character Name
         </div>
         <input 
@@ -213,28 +218,38 @@ export default function CharacterList(){
           placeholder='Enter character name...'
           value={newCharacterName ?? ''}
           maxLength={16}
+          style={{width: '33vh'}}
         />
-        <button 
-          style={{padding: '5px', width: '188px'}}
-          className='primary'
-          onClick={() => {handleAddCharacterClicked()}}
-        >
-          Add <strong>{newCharacterName ?? ''}</strong>
-        </button>
+      </div>
+    </div>
+    <div>
+      <button 
+        style={{ width: '33vh', height: '46px'}}
+        className='primary'
+        onClick={() => {handleAddCharacterClicked()}}
+      >
+        Add <strong>{newCharacterName ?? ''}</strong>
+      </button>
+    </div>
+    <div>
+      <AppErrorSection error={error} />
+    </div>
+    <div>
+      <div>
+        Search Characters
       </div>
       <div>
-        <AppErrorSection error={error} />
-      </div>
-      <div className='input-row-item'>
-        <input 
+         <input 
           onChange={(e) => {setSearch(e.target.value)}} 
           type='text'
           placeholder='Enter character name...'
           value={search ?? ''}
           maxLength={16}
+          style={{width: '33vh'}}
         />
       </div>
     </div>
+
     {showDanger && <div className='danger-zone'>
       <button className='danger' onClick={handleResetAllCharcters}>
         <strong>RESET</strong> All Characters

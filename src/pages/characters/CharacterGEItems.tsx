@@ -8,8 +8,10 @@ import AppErrorSection from '../core/AppErrorSection'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
 import InfoSection from '../core/InfoSection'
+import useScrollReveal from '../../hooks/useScrollReveal'
 
 export default function CharacterGEItems() {
+  useScrollReveal()
   const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
@@ -31,7 +33,9 @@ export default function CharacterGEItems() {
   const [search, setSearch] = useState('')
   const [searchGame, setSearchGame] = useState('both')
   const [error, setError] = useState('')
-
+  const [showDanger, setShowDanger] = useState(false)
+  const [sortOrder, setSortOrder] = useState<'' | 'asc' | 'desc'>('')
+  const [sortField, setSortField] = useState('')
   const handleEnterPress = () => {
     handleAddItemClicked()
   };
@@ -63,6 +67,10 @@ export default function CharacterGEItems() {
       }
   
       const geResponse = await fetchGEItem(newItem?.name as string, newItem.gameVersion)
+      if(!geResponse?.price){
+        setError('Failed to find an item with this name.')
+        return
+      }
       newItem.price = geResponse.price
       newItem.volume = geResponse.volume
       newItems.push(newItem)
@@ -95,12 +103,12 @@ export default function CharacterGEItems() {
   }, [newItemName, geItems])
 
   const handleItemRefresh = useCallback(async (itemId: string) => {
-    console.log(itemId)
     const item = geItems?.find(i => i.id === itemId)
-    console.log(item)
     if(!item) return
 
     const geResponse = await fetchGEItem(item?.name as string, item?.gameVersion)
+    const priceChanged = geResponse.price === item.price
+    
     const updatedItem: CharacterGEItem = {
       ...item,
       price: geResponse.price,
@@ -113,8 +121,9 @@ export default function CharacterGEItems() {
       itemId: item.id as string
     }
 
+    
+    
     const newItems = []
-    const newHistoryItems = []
     for(const item of geItems){
       if(item.id === itemId){
         newItems.push(updatedItem)
@@ -122,14 +131,64 @@ export default function CharacterGEItems() {
         newItems.push(item)
       }
     }
-    newHistoryItems.push(historyItem)
-    for(const history of geItemHistory){
-      newHistoryItems.push(history)
+    
+    if(priceChanged){
+      const newHistoryItems = []
+      newHistoryItems.push(historyItem)
+      for(const history of geItemHistory){
+        newHistoryItems.push(history)
+      }
+      setGEItemHistory(newHistoryItems)
     }
 
     setGEItems(newItems)
-    setGEItemHistory(newHistoryItems)
-  }, [])
+  }, [geItems, geItemHistory])
+
+  const handleDeleteItemById = useCallback((itemId: string) => {
+    if(!itemId) return
+    if(!confirm('Are you sure you want to entirely remove the item (along with all of its history)?')) return
+
+    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
+    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
+    const historyIds = relatedHistoryItems.map(h => h.id)
+
+    if(relatedHistoryItems?.length > 0){
+      const newHistory = []
+      for(const historyItem of geItemHistory){
+        if(!historyIds.includes(historyItem.id)){
+          newHistory.push(historyItem)
+        }
+      }
+      setGEItemHistory(newHistory)
+    }
+    const newItems = []
+    for(const item of geItems){
+      if(item.id !== relatedItem?.id){
+        newItems.push(item)
+      }
+    }
+    setGEItems(newItems)
+  }, [geItems, geItemHistory])
+
+  
+  const handleClearItemHistoryByItemId = useCallback((itemId: string) => {
+    if(!itemId) return
+    if(!confirm('Are you sure you want to reset the history for this item?')) return
+    
+    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
+    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
+    const historyIds = relatedHistoryItems.map(h => h.id)
+
+    if(relatedHistoryItems?.length > 0){
+      const newHistory = []
+      for(const historyItem of geItemHistory){
+        if(!historyIds.includes(historyItem.id)){
+          newHistory.push(historyItem)
+        }
+      }
+      setGEItemHistory(newHistory)
+    }
+  }, [geItems, geItemHistory])
 
   return <div className='characters-app'>
     <div id='top'></div>
@@ -140,14 +199,17 @@ export default function CharacterGEItems() {
       <div className='app-title smaller' style={{fontSize: 'x-large'}}>
         {character?.name}
       </div>
-
     </div>
-    <div style={{textAlign: 'center'}}>
-      Characters&nbsp;
+    <div>
+      <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
+        {showDanger ? 'Hide' : 'Show'} Danger Zones
+      </button>
+      &nbsp;Characters&nbsp;
       <button className='button-link' onClick={() => {navigate('/characters')}}>
          Teleport
       </button>
     </div>
+
     <div className='flex-wrap-gap'>
       <div>
         <div>
@@ -185,7 +247,9 @@ export default function CharacterGEItems() {
           </select>
         </div>
       </div>
-      <div >
+      
+    </div>
+    <div>
       <button 
         style={{ width: '33vh', height: '46px'}}
         className='primary'
@@ -193,48 +257,97 @@ export default function CharacterGEItems() {
       >
         Add <strong>{newItemName ?? ''}</strong>
       </button>
-      </div>
-      <div>
-        <AppErrorSection error={error} />
-      </div>
     </div>
     <div>
-      Search Items
+      <AppErrorSection error={error} />
     </div>
-    <div style={{width: '33vh', paddingBottom: '5px'}}>
-      <input 
-        onChange={(e) => {setSearch(e.target.value)}} 
-        type='text'
-        placeholder='Search item name...'
-        value={search ?? ''}
-        maxLength={16}
-        style={{width: '33vh'}}
-      />
-    </div>
+    
 
-    <div style={{textAlign: 'center'}}>
-      <button 
-        onClick={() => {setSearchGame('both')}} 
-        className={searchGame === 'both' ? 'primary selected' : 'primary'}
-      >
-        Both
-      </button>
-      <button 
-        onClick={() => {setSearchGame('rs')}} 
-        className={searchGame === 'rs' ? 'primary selected' : 'primary'}
-      >
-        RuneScape3
-      </button>
-      <button 
-        onClick={() => {setSearchGame('osrs')}} 
-        className={searchGame === 'osrs' ? 'primary selected' : 'primary'}
-      >
-        OSRS
-      </button>
+    <div className='flex-wrap-gap' style={{gap: '10px'}}>
+      <div>
+        <div>
+            Search Items
+          </div>
+          <div style={{width: '33vh', paddingBottom: '5px'}}>
+            <input 
+              onChange={(e) => {setSearch(e.target.value)}} 
+              type='text'
+              placeholder='Search item name...'
+              value={search ?? ''}
+              maxLength={16}
+              style={{width: '33vh'}}
+            />
+          </div>
+      </div>
+      <div>
+        <div>
+          Filter Version
+        </div>
+        <button 
+          onClick={() => {setSearchGame('both')}} 
+          className={searchGame === 'both' ? 'primary selected' : 'primary'}
+        >
+          Both
+        </button>
+        <button 
+          onClick={() => {setSearchGame('rs')}} 
+          className={searchGame === 'rs' ? 'primary selected' : 'primary'}
+        >
+          RuneScape 3
+        </button>
+        <button 
+          onClick={() => {setSearchGame('osrs')}} 
+          className={searchGame === 'osrs' ? 'primary selected' : 'primary'}
+        >
+          OSRS
+        </button>
+      </div>
+      <div>
+        <div>
+          Sort by Name
+        </div>
+        <div>
+          <button 
+            onClick={() => {setSortField(sortField === 'name' ? '' : 'name')}} 
+            className={sortField === 'name' ? 'primary selected' : 'primary'}
+          >
+            Name
+          </button>
+          <button 
+            onClick={() => {setSortField(sortField === 'price' ? '' : 'price')}} 
+            className={sortOrder === 'desc' ? 'primary selected' : 'primary'}
+          >
+            Price
+          </button>
+           - 
+          <button 
+            onClick={() => {setSortOrder(sortOrder === 'asc' ? '' : 'asc')}} 
+            className={sortOrder === 'asc' ? 'primary selected' : 'primary'}
+          >
+            ASC
+          </button>
+          <button 
+            onClick={() => {setSortOrder(sortOrder === 'desc' ? '' : 'desc')}} 
+            className={sortOrder === 'desc' ? 'primary selected' : 'primary'}
+          >
+            DESC
+          </button>
+        </div>
+      </div>
     </div>
     
     <div className='list'>
-      {geItems?.map((item, index) => {
+      {geItems?.sort((a, b) => {
+        if (sortOrder === "asc") {
+          return (a.name ?? "").localeCompare(b.name ?? "");
+        }
+
+        if (sortOrder === "desc") {
+          return (b.name ?? "").localeCompare(a.name ?? "");
+        }
+
+        return 0;
+      }).map((item, index) => {
         const historyItems = geItemHistory.filter(ih => ih.characterId === characterId && ih.itemId === item.id)
 
         let filteredOut = false
@@ -250,7 +363,7 @@ export default function CharacterGEItems() {
             filteredOut = true
           }
         }
-        return <div className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`} key={`${item.id}__${index}`}>
+        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
           <div className='list-item-header'>
             <div className='app-title'>
               {item.name}
@@ -260,7 +373,7 @@ export default function CharacterGEItems() {
             </div>
           </div>
           <InfoSection sectionTitle='GE' 
-            linkUrl={`/characters/${characterId}/ge/planner/${item.id}`}
+            linkUrl={`/characters/${characterId}/ge/planner/${item.gameVersion}/${item.id}`}
             linkText={`Item Planner`}
             button={{
               className: 'primary',
@@ -290,6 +403,14 @@ export default function CharacterGEItems() {
               value: `${historyItems?.length?.toLocaleString() ?? 0}`
             }
           ]} />
+          {showDanger && <div className='danger-zone'>
+            <button onClick={() => {handleDeleteItemById(item.id as string)}} className='danger'>
+              <strong>DELETE</strong> {item.name}
+            </button>
+            <button onClick={() => {handleClearItemHistoryByItemId(item.id as string)}} className='danger'>
+              <strong>RESET</strong> History
+            </button>
+          </div>}
         </div>
       })}
     </div>

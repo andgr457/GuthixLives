@@ -1,7 +1,9 @@
+import useMousePositionCSS from '../hooks/useMousePositionCSS'
 import useScrollReveal from '../hooks/useScrollReveal'
 
 export default function Home() {
   useScrollReveal()
+  useMousePositionCSS()
   return <div>
     <div className='app-title'>
       Welcome
@@ -11,8 +13,8 @@ export default function Home() {
         Guthix Lives is a <strong>RuneScape 3</strong> social community that has been
         going strong for over 13 years.
       </div>
-      <div className='app-logo '>
-          <img src='img/guthix.svg'></img>
+      <div className='app-logo'>
+        <img src='img/guthix.svg'></img>
       </div>
       <div className='reveal'>
         <div className='basic-div'>
