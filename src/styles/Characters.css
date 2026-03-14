@@ -1,0 +1,28 @@
+.characters-new {
+  padding: 1em;
+}
+
+.characters-label {
+  letter-spacing: 5px;
+  font-size: .9em;
+}
+
+.characters-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.characters-character {
+  border-radius: 10px;
+  background-color: #1b1b1b;
+}
+
+.characters-character-name {
+  font-size: 1.5em;
+  font-weight: bolder;
+  letter-spacing: 2px;
+}
+
+.characters-info-item {
+  letter-spacing: 1px;
+}

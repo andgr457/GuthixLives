@@ -13,10 +13,11 @@ export default function PublicNavigationMenu() {
 
   const links = [
     { name: "Home", path: "/home" },
+    { name: "Characters", path: "/characters" },
     { name: "Events", path: "/events" },
     { name: "GE Tracker", path: "/getracker" },
-    { name: "GE Planner", path: "/geplanner" },
-    { name: "Toon Planner", path: "/toonplanner" },
+    // { name: "GE Planner", path: "/geplanner" },
+    // { name: "Toon Planner", path: "/toonplanner" },
 
   ];
 

@@ -221,7 +221,7 @@ export default function GETracker() {
       <div className="ge-item-list">
           {items.map((item, index) => (
             <>
-            <div className='ge-item'>
+            <div className='ge-item' key={`${item.id}_${index}`}>
               <div className='ge-item-header'>
                 {item.name}
               </div>

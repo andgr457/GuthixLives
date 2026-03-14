@@ -5,6 +5,7 @@
   width: 100%;
   z-index: 50;
   font-size: larger;
+  top: 0;
 }
 
 .nav-content {

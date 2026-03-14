@@ -1,9 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import Events from './pages/events/Events';
+import Home from './pages/Home';
+import CharacterList from './pages/characters/CharacterList';
+import CharacterGEItems from './pages/characters/CharacterGEItems';
 import GEPlanner from './pages/ge/GEPlanner';
 import GEPlannerItem from './pages/ge/GEPlannerItem';
 import GETracker from './pages/ge/GETracker';
-import Home from './pages/Home';
 import ToonPlanner from './pages/toon/ToonPlanner';
 import ToonTasks from './pages/toon/ToonTasks';
 
@@ -11,6 +13,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path='/characters' element={<CharacterList />} />
+      <Route path="/characters/:characterId/ge" element={<CharacterGEItems />} />
+
       <Route path='/events' element={<Events />} />
       <Route path="/toonplanner" element={<ToonPlanner />} />
       <Route path="/getracker" element={<GETracker />} />

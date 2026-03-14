@@ -14,32 +14,134 @@
 
 
 .app-main {
-  padding-top: 65px;
-  
+  margin-top: 65px;
+  height: 93vh;
+  min-height: fit-content;
+  padding: 1em;
+  border: #5ec77686 2px solid;
+  border-radius: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 .app-main a {
   text-decoration: none;
-  color:#52a265;
-  height: 100vh;
+  color:#5ec776;
 }
 
 .app-main a:hover {
   text-decoration: none;
-  color:#3c7c4b;
+  color:#499c5c;
 }
 
-.parchment {
-  font-size: 1em;
+.app-error {
+  font-size: 0.85em;
+  font-weight: bolder;
+  color: rgb(241, 216, 79);
+  letter-spacing: 3px;
+  padding: 0.25em;
+  margin-top: -25px;
+}
+
+.app-title {
+  text-align: center;
+  letter-spacing: 2px;
+  font-size: 1.5em;
+  color: #FFD700;
+  text-shadow:
+  0 0 5px #fff
+  ,0 0 10px #fff
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 35px #FFD700
+  ;
+}
+
+.button-link {
+  all: unset;
+  text-decoration: none;
+  color:#5ec776;
+  cursor: pointer;
+}
+
+.button-link:hover {
+  text-decoration: none;
+  color:#499c5c;
+}
+
+.clan-name {
+  text-align: center;
+  font-size: 2em;
+  color: #FFD700;
+  letter-spacing: 2px;
+}
+
+.clan-logo {
+  text-align: center;
+}
+
+.clan-logo img {
+  height: 40vh;
+  background-color: rgba(127, 127, 127, 0.436);
+  padding: 1em;
+  border: rgb(197, 168, 0) solid 2px;
+  border-radius: 20em;
+}
+
+.basic-div {
+  font-size: 0.9em;
   letter-spacing: 1px;
   padding: 1em;
-  margin: 12px;
-  border-radius: 6px;
-  margin-left: 15%;
-  margin-right: 15%;
   text-align: center;
-  background-color: #3b2f1b;
-  color: #e6b844c8;
+}
+
+.flex-wrap-gap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.danger-zone {
+  border: #ffd9005a dashed .125em;
+  padding: 2px;
+  width: fit-content;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.danger-zone button {
+  height: 35px;
+  margin: 5px;
+  font-size: x-small !important;
+  letter-spacing: 1px;
+}
+
+/* Base visible item */
+.list-item-slow-hide {
+  width: 100%;
+  padding: 0.55em;
+  border-radius: 10px;
+  background-color: #1b1b1b;
+
+  opacity: 1;
+  transform: scaleY(1);
+
+  transition: all 0.35s ease;
+  overflow: hidden;
+  margin: 0.25em 0;       /* optional spacing between items */
+  line-height: 1;         /* ensures no extra height */
+}
+
+/* Hidden state */
+.list-item-slow-hide.hide {
+  opacity: 0;
+  transform: scaleY(0.95);
+  max-height: 0;
+  padding: 0;
+  margin: 0;              /* collapse margin */
+  line-height: 0;         /* collapse text height */
+  border-radius: 0;       /* remove rounding to prevent tiny gaps */
 }
 
 @keyframes parchmentShift {
@@ -54,16 +156,12 @@
   }
 }
 
-.parchment-list {
-}
-
 body {
   margin: 0;
   font-family: "Cinzel", serif;
   background: radial-gradient(circle at top, #2e2e2e, #121212);
   color: var(--text);
 }
-
 
 .container {
   min-height: 100vh;
@@ -94,10 +192,10 @@ body {
 
 .input-row-item {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  height: 25px;
-  width: 80px;
+  width: 100%;
 }
 
 .input-row-item input {
