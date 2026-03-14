@@ -7,14 +7,15 @@ export interface Character {
   showItemHistoryItemId: string | undefined
 }
 
+export type GEItemGameVersion = 'osrs' | 'rs'
 export interface CharacterGEItem {
   id?: string
   characterId: string
-  name: string;
+  name?: string;
   price?: number
   volume?: number
   geTimestamp?: string;
-  gameVersion?: 'osrs' | 'rs'
+  gameVersion?: GEItemGameVersion
 }
 
 export interface CharacterGEItemHistory extends CharacterGEItem {

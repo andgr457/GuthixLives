@@ -314,6 +314,7 @@ input {
   border-radius: 4px;
   color: var(--text);
   font-family: inherit;
+  
 }
 
 input:focus {
@@ -453,7 +454,7 @@ button.danger:hover {
   border-right-color: #3f3316; /* shadow */
   border-bottom-color: #3f3316;/* shadow */
 
-  padding: 5px 12px;
+  padding: 10px 12px;
   border-radius: 2px;
 
   cursor: pointer;
@@ -486,6 +487,7 @@ button.danger:hover {
   background-position: right 10px center;
   background-size: 10px;
 }
+
 
 .sticky-header {
   position: sticky;

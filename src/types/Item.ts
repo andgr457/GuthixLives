@@ -6,6 +6,7 @@ export interface GEItemData {
   id?: number
   name: string;
   price?: number
+  volume?: number
   timestamp?: string;
 }
 

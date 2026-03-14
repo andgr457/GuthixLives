@@ -6,6 +6,7 @@ import { CharacterStorageKeys } from './CharactersStorageKeys';
 import InfoSection from '../core/InfoSection';
 import { DateTime } from 'luxon';
 import AppErrorSection from '../core/AppErrorSection';
+import { useKeyPress } from '../../hooks/useKeyPress';
 
 export default function CharacterList(){
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +32,11 @@ export default function CharacterList(){
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [showDanger, setShowDanger] = useState(false)
+  const handleEnterPress = () => {
+    handleAddCharacterClicked()
+  };
 
+  useKeyPress('Enter', handleEnterPress);
   const exportData = () => {
     const dataStr = JSON.stringify({characters, geItems, geItemHistory}, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -67,8 +72,6 @@ export default function CharacterList(){
   };
 
   const handleAddCharacterClicked = useCallback(() => {
-    console.log('handleAddCharacterClicked')
-    console.log(newCharacterName)
     setError('')
     if(!newCharacterName || !newCharacterName.trim()) {
       setError('Character name cannot be empty.')
@@ -116,7 +119,7 @@ export default function CharacterList(){
 
   const handleDeleteDataByCharacterId = useCallback((characterId: string) => {
     console.log(characterId)
-    if(!confirm(`Are you sure you want to delete this? This cannot be undone and you should save an export.`)) return
+    if(!confirm(`Are you sure you want to delete this character? This cannot be undone and you should save an export.`)) return
     const relatedItems = geItems?.filter(i => i.characterId === characterId)
     const itemIds = relatedItems?.map(i => i.id)
     const relatedHistory = geItemHistory?.filter(ih => itemIds.includes(ih.itemId))
@@ -218,7 +221,6 @@ export default function CharacterList(){
         </button>
       </div>
       <div>
-        
         <AppErrorSection error={error} />
       </div>
       <div className='input-row-item'>
