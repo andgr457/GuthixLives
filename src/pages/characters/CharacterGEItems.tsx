@@ -133,70 +133,86 @@ export default function CharacterGEItems() {
 
   return <div className='characters-app'>
     <div id='top'></div>
-    <div className='app-title'>
-      Grand Exchange Item Tracker
+    <div className='list-item-header'>
+      <div className='app-title'>
+        Grand Exchange Item Tracker
+      </div>
+      <div className='app-title smaller' style={{fontSize: 'x-large'}}>
+        {character?.name}
+      </div>
+
     </div>
-    <div className='app-title smaller'>
-      {character?.name}
-    </div>
-    <br/>
     <div style={{textAlign: 'center'}}>
       Characters&nbsp;
       <button className='button-link' onClick={() => {navigate('/characters')}}>
          Teleport
       </button>
     </div>
-    <br/>
-    <div className='input-row-item' style={{width: '20em'}}>
+    <div className='flex-wrap-gap'>
       <div>
-        New Item Name
+        <div>
+          New Item Name
+        </div>
+        <div>
+          <input 
+            style={{width: '33vh'}}
+            onChange={(e) => {setNewItemName(e.target.value)}} 
+            type='text'
+            placeholder='Enter item name...'
+            value={newItemName ?? ''}
+          />
+        </div>
       </div>
-      <input 
-        onChange={(e) => {setNewItemName(e.target.value)}} 
-        type='text'
-        placeholder='Enter item name...'
-        value={newItemName ?? ''}
-      />
-      <div title='Determines what API to get data from.'>
-        Game Version
+      <div>
+        <div>
+          Game Version
+        </div>
+        <div>
+          <select
+            className="rs-select"
+            style={{width: '33vh'}}
+            value={newItemGameVersion}
+            onChange={(e) =>
+              setNewItemGameVersion(e.currentTarget.value)
+            }
+          >
+            <option className='rs-select-item' value='rs'>
+              RuneScape 3
+            </option>
+            <option value='osrs'>
+              Old School RuneScape
+            </option>
+          </select>
+        </div>
       </div>
-      <select
-        className="rs-select"
-        style={{width: '25em'}}
-        value={newItemGameVersion}
-        onChange={(e) =>
-          setNewItemGameVersion(e.currentTarget.value)
-        }
-      >
-        <option className='rs-select-item' value='rs'>
-          RuneScape 3
-        </option>
-        <option value='osrs'>
-          Old School RuneScape
-        </option>
-      </select>
+      <div >
       <button 
-        style={{padding: '5px', width: '188px'}}
+        style={{ width: '33vh', height: '46px'}}
         className='primary'
         onClick={() => {handleAddItemClicked()}}
       >
         Add <strong>{newItemName ?? ''}</strong>
       </button>
+      </div>
+      <div>
+        <AppErrorSection error={error} />
+      </div>
     </div>
     <div>
-      <AppErrorSection error={error} />
+      Search Items
     </div>
-    <div className='input-row-item'>
+    <div style={{width: '33vh', paddingBottom: '5px'}}>
       <input 
         onChange={(e) => {setSearch(e.target.value)}} 
         type='text'
-        placeholder='Enter character name...'
+        placeholder='Search item name...'
         value={search ?? ''}
         maxLength={16}
+        style={{width: '33vh'}}
       />
     </div>
 
-    <div>
+    <div style={{textAlign: 'center'}}>
       <button 
         onClick={() => {setSearchGame('both')}} 
         className={searchGame === 'both' ? 'primary selected' : 'primary'}

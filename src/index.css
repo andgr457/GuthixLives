@@ -12,7 +12,6 @@
   box-sizing: border-box;
 }
 
-
 .app-main {
   margin-top: 65px;
   height: 92vh;
@@ -49,7 +48,7 @@
   color: rgb(241, 216, 79);
   letter-spacing: 3px;
   padding: 0.25em;
-  margin-top: -25px;
+  margin-top: 10px;
   animation: shake 0.5s ease-in-out forwards;
 }
 
@@ -67,6 +66,9 @@
   letter-spacing: 2px;
   font-size: 2em;
   color: #FFD700;
+  background: #1e2f22;
+  margin: 10px;
+  border-radius: 5px;
   text-shadow:
   0 0 1px #fff
   ,0 0 2px #fff
@@ -121,6 +123,10 @@
 
 .app-logo {
   text-align: center;
+
+}
+
+.app-header-buttons {
 
 }
 
@@ -209,6 +215,8 @@
 
 .list-item-header{
   background: #1e2f22;
+  margin: 5px;
+  border-radius: 5px;
 }
 
 /* Hidden state */

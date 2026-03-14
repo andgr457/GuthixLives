@@ -167,11 +167,13 @@ export default function CharacterList(){
   
   return <div className='characters-app'>
     <div id='top'></div>
-    <div className='app-title'>
-      Characters
+    <div className='list-item-header'>
+      <div className='app-title'>
+        Characters
+      </div>
     </div>
 
-    <div style={{textAlign: 'center', display: 'flex', flexWrap: 'wrap', gap: '15px'}}>
+    <div className='flex-wrap-gap action-bar'>
       <div>
         <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
           {showDanger ? 'Hide' : 'Show'} Danger Zones
@@ -306,7 +308,7 @@ export default function CharacterList(){
             
             <div className='danger-zone' hidden={!showDanger}>              
               <button key={`btnDeleteCharacter_${character.id}`} className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
-                <strong>DELETE</strong> {character.name} {character.id}
+                <strong>DELETE</strong> {character.name}
               </button>
             </div>
           </div>
