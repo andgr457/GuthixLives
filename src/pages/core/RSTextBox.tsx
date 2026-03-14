@@ -1,7 +1,6 @@
 import type { RSTextBoxProps } from '../../interfaces/core/RSTextBox'
 import AppErrorSection from './AppErrorSection'
 import '../../styles/RSTextBox.css'
-
 export default function RSTextBox(props: RSTextBoxProps){
   return <div className='rstextbox'>
     <div className='rstextbox-title'>
@@ -12,9 +11,9 @@ export default function RSTextBox(props: RSTextBoxProps){
         onChange={props?.textbox?.onChange} 
         type='text'
         placeholder={props?.textbox?.placehoder}
+        value={props?.textbox?.value}
       />
       {props?.button && <button 
-        type={props?.button?.type}
         className={props?.button?.className}
         onClick={props?.button?.onClick}
       >

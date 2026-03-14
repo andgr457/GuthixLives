@@ -8,7 +8,7 @@ interface RSTextBoxAsFormProps {
 }
 
 export default function RSTextBoxAsForm(props: RSTextBoxAsFormProps){
-  return <form onSubmit={withPreventDefault(props.onSubmit)}>
+  return <form onSubmit={() => {withPreventDefault(props.onSubmit)}}>
       <RSTextBox 
         {...props.rsTextBoxProps}
       />

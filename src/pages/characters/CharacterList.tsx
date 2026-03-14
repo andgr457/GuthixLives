@@ -17,7 +17,7 @@ export default function CharacterList(){
     CharacterStorageKeys.Characters,
     []
   );
-  const [transactions] = useLocalStorage<CharacterGPTransaction[]>(
+  const [transactions, setTransactions] = useLocalStorage<CharacterGPTransaction[]>(
     CharacterStorageKeys.CharactersGPTransactions,
     []
   );
@@ -30,7 +30,7 @@ export default function CharacterList(){
     []
   );
 
-  const [newCharacterName, setNewCharacterName] = useState('')
+  const [newCharacterName, setNewCharacterName] = useState<string | undefined>('')
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [showDanger, setShowDanger] = useState(false)
@@ -69,10 +69,12 @@ export default function CharacterList(){
     reader.readAsText(file);
   };
 
-  const handleAddCharacterClicked = useCallback(async () => {
+  const handleAddCharacterClicked = useCallback(() => {
+    console.log(newCharacterName)
     setError('')
     if(!newCharacterName || !newCharacterName.trim()) {
       setError('Character name cannot be empty.')
+      setNewCharacterName('')
       return
     }
     const characterName = newCharacterName.trim()
@@ -85,17 +87,80 @@ export default function CharacterList(){
     const newCharacter: Character = characterService.generateNewCharacter(characterName)
     const newCharacters: Character[] = []
     newCharacters.push(newCharacter)
-    newCharacters.push(...characters.map(c => c))
+    for(const character of characters){
+      newCharacters.push(character)
+    }
+    setNewCharacterName('')
     setCharacters(newCharacters)
-  }, [newCharacterName])
+  }, [characters, newCharacterName])
 
   const handleDeleteAllCharacters = useCallback(() => {
     if(!confirm('Are you sure you want to delete all characters? This cannot be undone and you should save an export.')) return
     setGEItems([])
     setGEItemHistory([])
+    setTransactions([])
     setCharacters([])
   }, [])
 
+  const handleResetAllCharcters = useCallback(() => {
+    if(!confirm('Are you sure you want to reset all characters? This will keep just characters, cannot be undone, and you should save an export.')) return
+    setGEItems([])
+    setGEItemHistory([])
+    setTransactions([])
+  }, [characters, geItems, geItemHistory, transactions])
+
+  const handleDeleteDataByCharacterId = useCallback((characterId: string) => {
+    console.log(characterId)
+    const c = characters?.find(c => c.id = characterId)
+    console.log(c)
+    alert(JSON.stringify(c))
+    if(!c) return
+    if(!confirm(`Are you sure you want to delete ${c?.name}? This cannot be undone and you should save an export.`)) return
+    const relatedItems = geItems?.filter(i => i.characterId === c?.id)
+    const itemIds = relatedItems?.map(i => i.id)
+    const relatedHistory = geItemHistory?.filter(ih => itemIds.includes(ih.itemId))
+    const historyIds = relatedHistory?.map(h => h.id)
+    const relatedTxns = transactions?.filter(t => t.characterId === c?.id)
+    const txnIds = relatedTxns?.map(t => t.id)
+    
+    const newTxns = []
+    for(const txn of transactions){
+      if(txnIds.includes(txn.id)){
+        continue // to not add it to the new array of transactions effectively removing it
+      }
+      newTxns.push(txn)
+    }
+
+    const newHistory = []
+    for(const itemHistory of geItemHistory){
+      if(historyIds.includes(itemHistory.id)){
+        continue
+      }
+      newHistory.push(itemHistory)
+    }
+
+    const newItems = []
+    for(const item of geItems){
+      if(itemIds.includes(item.id)){
+        continue
+      }
+      newItems.push(item)
+    }
+
+    const newCharacters = []
+    for(const character of characters){
+      if(character.id === c?.id){
+        continue
+      }
+      newCharacters.push(character)
+    }
+
+    setGEItems(newItems)
+    setGEItemHistory(newHistory)
+    setTransactions(newTxns)
+    setCharacters(newCharacters)
+  }, [characters, geItems, geItemHistory, transactions])
+  
   return <div className='characters-app'>
     <div id='top'></div>
     <div className='app-title'>
@@ -112,8 +177,6 @@ export default function CharacterList(){
         <button className="primary" onClick={exportData}>
           Export
         </button>
-        
-
       </div>
       <div>
         <button
@@ -134,29 +197,23 @@ export default function CharacterList(){
     </div>
 
     <div className='characters-new'>
-      <RSTextBoxAsForm 
-        onSubmit={handleAddCharacterClicked}
-        rsTextBoxProps={{
-          showError: true,
-          errorMessage: error,
-          label: {
-            value: 'New Character Name'
-          },
-          textbox: {
-            id: `new_char_text`,
-            key: 'new_char_text',
+      <RSTextBox 
+        label={{value: 'New Item Name'}}
+        showError={true}
+        textbox={{
+          id: `new_char_text`,
+          key: 'new_char_text',
             onChange: (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {setNewCharacterName(e.currentTarget.value)},
-            placehoder: 'New character name...',
-            value: newCharacterName
-          },
-          button: {
-            className: 'primary',
-            onClick: handleAddCharacterClicked,
-            text: 'Add Character',
-            type: 'submit'
-          }
+          placehoder: 'New character name...',
+          value: newCharacterName ?? ''
         }}
+        button={{
+          className: 'primary',
+          onClick: handleAddCharacterClicked,
+          text: 'Add Item',
+        }}  
       />
+      {typeof newCharacterName} {newCharacterName?.length ?? 0}
       <RSTextBox 
         showError={false}
         errorMessage={error}
@@ -173,14 +230,14 @@ export default function CharacterList(){
       />
     </div>
     {showDanger && <div className='danger-zone'>
-      <button className='danger'>
-        Reset All Characters
+      <button className='danger' onClick={handleResetAllCharcters}>
+        <strong>RESET</strong> All Characters
       </button>
       <button className='danger' onClick={handleDeleteAllCharacters}>
-        Delete All Characters
+        <strong>DELETE</strong> All Characters
       </button>
     </div>}
-    <div className='characters-list'>
+    <div className='list'>
       {characters?.map((character, index) => {
         let filteredOut = false
         if(search && search.length > 0){
@@ -203,8 +260,8 @@ export default function CharacterList(){
           totalGP += txn.amount
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
-          <div className='characters-character-name'>
-            {character.name}
+          <div className='app-title small left'>
+            {character.name} <span style={{fontSize: '10px'}}>{character.id}</span>
           </div>
           <div className='flex-wrap-gap'>
             <InfoSection sectionTitle='GE' 
@@ -243,20 +300,11 @@ export default function CharacterList(){
               }
             ]} />
             
-            {showDanger && <div className='danger-zone'>              
-              <button className='danger'>
-                Delete Character
+            <div className='danger-zone'>              
+              <button className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
+                <strong>DELETE</strong> {character.name} {character.id}
               </button>
-              <button className='danger'>
-                Reset Everything
-              </button>
-              <button className='danger'>
-                Reset GE
-              </button>
-              <button className='danger'>
-                Reset Quester's Run
-              </button>  
-            </div>}
+            </div>
           </div>
           
         </div>

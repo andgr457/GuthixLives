@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction } from '../../types/Characters'
 import { CharacterItemService } from '../../services/character/CharacterItemService'
 import { CharacterStorageKeys } from './CharactersStorageKeys'
+import RSTextBoxAsForm from '../core/RSTextBoxAsForm'
+import RSTextBox from '../core/RSTextBox'
 
 export default function CharacterGEItems() {
   const navigate = useNavigate()
@@ -44,13 +46,18 @@ export default function CharacterGEItems() {
     setGEItems(newItems)
   }, [newItemName, geItems, character])
 
+  const handleAddItemClicked = useCallback(() => {
+    if(!newItemName || !newItemName?.trim()) return
+
+  }, [newItemName])
+
   return <div className='characters-app'>
     <div id='top'></div>
     <div className='app-title'>
-      {character?.name}
+      Grand Exchange Item Tracker
     </div>
-    <div className='app-title' style={{fontSize: '1em', letterSpacing: '3px'}}>
-      GE Items
+    <div className='app-title smaller'>
+      {character?.name}
     </div>
 
     <div>
@@ -59,19 +66,24 @@ export default function CharacterGEItems() {
     <div className='character-name'>
       {character?.name}
     </div>
-    <div className='character-new-item'>
-      <input 
-        type='text'
-        onChange={(e) => {setNewItemName(e.currentTarget.value)}}
-        value={newItemName}
-        placeholder='Enter RS item name...'
-      />
-      <button
-        className='primary'
-        onClick={handleNewItemClicked}
-      >
-        Add Item
-      </button>
+    <RSTextBox
+      label={{value: 'New Item Name'}}
+      showError={true}
+      textbox={{
+        id: `new_item_text`,
+        key: 'new_item_text',
+        onChange: (e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {setNewItemName(e.currentTarget.value)},
+        placehoder: 'New item name...',
+        value: newItemName ?? ''
+      }}
+      button={{
+        className: 'primary',
+        onClick: handleAddItemClicked,
+        text: 'Add Item',
+      }}      
+    />
+    <div className=''>
+
     </div>
     <div>
       {geItems?.map((item, index) => {

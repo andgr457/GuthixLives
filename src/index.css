@@ -15,13 +15,22 @@
 
 .app-main {
   margin-top: 65px;
-  height: 93vh;
+  height: 92vh;
   min-height: fit-content;
   padding: 1em;
   border: #5ec77686 2px solid;
   border-radius: 10px;
   margin-left: 5px;
   margin-right: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 0 5px #fff
+  ,0 0 10px #fff
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 15px #FFD700
+  ;
 }
 
 .app-main a {
@@ -41,12 +50,52 @@
   letter-spacing: 3px;
   padding: 0.25em;
   margin-top: -25px;
+  animation: shake 10s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
 }
 
 .app-title {
   text-align: center;
   letter-spacing: 2px;
+  font-size: 2em;
+  color: #FFD700;
+  text-shadow:
+  0 0 3px #fff
+  ,0 0 6px #fff
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 9px #FFD700
+  ;
+}
+
+.app-title.smaller {
+  font-size: 1em;
+}
+
+.app-title.small {
   font-size: 1.5em;
+  text-align: left;
+}
+
+.app-title:hover {
+  letter-spacing: 5px;
+  color: #46ff43;
+}
+
+.app-title-2 {
+  text-align: center;
+  letter-spacing: 3px;
+  font-size: 1em;
   color: #FFD700;
   text-shadow:
   0 0 5px #fff
@@ -57,6 +106,10 @@
   ,0 0 30px #FFD700 */
   ,0 0 35px #FFD700
   ;
+}
+
+.app-title-2:hover {
+  letter-spacing: 6px;
 }
 
 .button-link {
@@ -103,11 +156,16 @@
 }
 
 .danger-zone {
-  border: #ffd9005a dashed .125em;
+  border: #d3b60f dashed .125em;
   padding: 2px;
   width: fit-content;
+  height: fit-content;
   border-radius: 5px;
   text-align: center;
+}
+
+.danger-zone strong {
+  letter-spacing: 4px;
 }
 
 .danger-zone button {
@@ -117,19 +175,36 @@
   letter-spacing: 1px;
 }
 
+.list {
+  background-color: #00b22958;
+  box-shadow: 0 0 3px #fff
+  ,0 0 6px #fff
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 9px #FFD700
+}
+
+.list div {
+  padding: 6px;
+}
+
 /* Base visible item */
 .list-item-slow-hide {
   width: 100%;
+  height: fit-content;
   padding: 0.55em;
   border-radius: 10px;
   background-color: #1b1b1b;
 
   opacity: 1;
   transform: scaleY(1);
+  transform: scaleX(1);
 
-  transition: all 0.35s ease;
+  transition: all 0.35s ease-in-out;
   overflow: hidden;
-  margin: 0.25em 0;       /* optional spacing between items */
+  margin: 0.4em 0;       /* optional spacing between items */
   line-height: 1;         /* ensures no extra height */
 }
 
@@ -137,10 +212,12 @@
 .list-item-slow-hide.hide {
   opacity: 0;
   transform: scaleY(0.95);
+  transform: scaleX(0.95);
   max-height: 0;
   padding: 0;
   margin: 0;              /* collapse margin */
   line-height: 0;         /* collapse text height */
+  width: 0;
   border-radius: 0;       /* remove rounding to prevent tiny gaps */
 }
 
