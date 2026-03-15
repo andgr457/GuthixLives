@@ -115,6 +115,14 @@
 
 }
 
+.glow {
+  background: radial-gradient(
+    circle at var(--mouseX) var(--mouseY),
+    rgba(255,255,255,0.2),
+    transparent 70px
+  );
+}
+
 .clan-name {
   text-align: center;
   font-size: 2em;
@@ -124,12 +132,43 @@
 
 .app-logo {
   text-align: center;
-
+  animation: spin 10s linear infinite;
 }
+
+@keyframes spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes flipXTest {
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+@keyframes flipX {
+  0% {
+    transform: scale(0.01) rotateY(0deg);
+
+  }
+  50% {
+    transform: scale(1) rotateY(180deg);
+
+  }
+  100% {
+    transform: scale(0.01) rotateY(360deg);
+    
+  }
+}
+
 
 .app-logo img {
   height: 40vh;
-  background-color: rgba(127, 127, 127, 0.436);
+  background-color: #545454;
   padding: 1em;
   border: #FFD700 solid 1px;
   border-radius: 125px;
@@ -142,19 +181,10 @@
   ,0 0 30px #FFD700 */
   ,0 0 3px #FFD700
   ;
-
 }
 
-.glow {
-  background: radial-gradient(
-    circle at var(--mouseX) var(--mouseY),
-    rgba(255,255,255,0.2),
-    transparent 70px
-  );
-}
 
 .app-logo img:hover {
-  transform: scaleX(-1);
   box-shadow:
   0 0 1px #499c5c
   ,0 0 2px #499c5c

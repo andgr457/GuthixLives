@@ -29,3 +29,19 @@ export interface CharacterGPTransaction {
   note?: string
   amount: number
 }
+
+export interface CharacterGEOrder {
+  id: string
+  characterId: number
+  title: string
+  notes?: string
+}
+
+export interface CharacterGEOrderItem {
+  id: string
+  orderId: string
+  itemId: string
+  boughtPrice: number
+  sellPrice: number
+  taxed: boolean
+}

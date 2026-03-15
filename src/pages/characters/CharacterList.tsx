@@ -207,7 +207,7 @@ export default function CharacterList(){
         />
       </div>
     </div>
-    <div className='flex-wrap-gap'>
+    <div className='flex-wrap-gap' style={{gap: '1em'}}>
       <div>
         <div>
           New Character Name
@@ -220,34 +220,35 @@ export default function CharacterList(){
           maxLength={16}
           style={{width: '33vh'}}
         />
+        <br/>
+        <button 
+          style={{ width: '33vh'}}
+          className='primary'
+          onClick={() => {handleAddCharacterClicked()}}
+        >
+          Add <strong>{newCharacterName ?? ''}</strong>
+        </button>
       </div>
-    </div>
-    <div>
-      <button 
-        style={{ width: '33vh', height: '46px'}}
-        className='primary'
-        onClick={() => {handleAddCharacterClicked()}}
-      >
-        Add <strong>{newCharacterName ?? ''}</strong>
-      </button>
+      <div>
+        <div>
+          <div>
+            Search Characters
+          </div>
+          <div>
+            <input 
+              onChange={(e) => {setSearch(e.target.value)}} 
+              type='text'
+              placeholder='Enter character name...'
+              value={search ?? ''}
+              maxLength={16}
+              style={{width: '33vh'}}
+            />
+          </div>
+        </div>
+      </div>
     </div>
     <div>
       <AppErrorSection error={error} />
-    </div>
-    <div>
-      <div>
-        Search Characters
-      </div>
-      <div>
-         <input 
-          onChange={(e) => {setSearch(e.target.value)}} 
-          type='text'
-          placeholder='Enter character name...'
-          value={search ?? ''}
-          maxLength={16}
-          style={{width: '33vh'}}
-        />
-      </div>
     </div>
 
     {showDanger && <div className='danger-zone'>

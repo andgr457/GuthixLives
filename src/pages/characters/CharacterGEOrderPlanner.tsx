@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useNavigate, useParams } from 'react-router-dom'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, GEItemGameVersion } from '../../types/Characters'
 import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
@@ -9,12 +8,15 @@ import InfoSection from '../core/InfoSection'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction, GEItemGameVersion } from '../../types/Characters'
 
-export default function CharacterGEItems() {
+export default function CharacterGEOrderPlanner() {
   useScrollReveal()
   const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
+  const {itemId} = useParams<{ itemId: string }>();
+
   const [characters] = useLocalStorage<Character[]>(
     CharacterStorageKeys.Characters,
     []
@@ -28,6 +30,10 @@ export default function CharacterGEItems() {
     []
   );
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
+  const [item] = useState<CharacterGEItem | undefined>(geItems.find(i => i.characterId === characterId && i.id === itemId))
+  const [itemHistory] = useState<CharacterGEItemHistory[] | undefined>(geItemHistory.filter(h => h.itemId === itemId && h.characterId === characterId))
+  const [itemTransactions] = useState<CharacterGPTransaction[] | undefined>()
+  
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
   const [search, setSearch] = useState('')
