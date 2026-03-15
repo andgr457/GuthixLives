@@ -221,14 +221,14 @@ export default function CharacterGEItems() {
 
     <div className='list-item-header'>
       <div className='app-title'>
-        Grand Exchange Item Tracker
+        Grand Exchange Items
       </div>
       <div className='app-title smaller' style={{fontSize: 'x-large'}}>
         {character?.name}
       </div>
     </div>
     
-    <div className='flex-wrap-gap' style={{gap: '10px'}}>
+    <div className='flex-wrap-gap' style={{gap: '10px', padding: '1em'}}>
       
       <div>
         <div>
@@ -250,20 +250,20 @@ export default function CharacterGEItems() {
         <div>
           Actions
         </div>
-        <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
-          Add New Item
-        </button>
-        <button onClick={() => {navigate('/characters')}} className='primary'>
-          Character List
-        </button>
-        <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
-          {showDanger ? 'Hide' : 'Show'} Danger Zones
-        </button>
-        <div>
+        <div className='flex-wrap-gap' style={{gap: '8px'}}>
+          <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+            New Item
+          </button>
+          <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
+            {showDanger ? 'Hide' : 'Show'} Danger Zones
+          </button>
+          <button style={{}} onClick={() => {navigate('/characters')}} className='button-link'>
+            Character List
+          </button>
         </div>
       </div>
-      <div>
-        
+      
+      <div>  
         <div>
           Filter Version
         </div>
@@ -288,7 +288,7 @@ export default function CharacterGEItems() {
       </div>
       <div>
         <div>
-          Sort by Name
+          Sort by
         </div>
         <div>
           <button 
@@ -320,8 +320,9 @@ export default function CharacterGEItems() {
       </div>
     </div>
     
+    {geItems?.filter(i => i.characterId === characterId).length === 0 && <div className='list-item' style={{marginTop: '20px'}}>There seems to be nothing here. Click "New Item".</div>}
     <div className='list'>
-      {geItems?.sort((a, b) => {
+      {geItems?.filter(i => i.characterId === characterId).sort((a, b) => {
           if (sortOrder === "asc") {
             if (sortField === "name") {
               return (a.name ?? "").localeCompare(b.name ?? "");
@@ -371,8 +372,6 @@ export default function CharacterGEItems() {
 
           <div className='flex-wrap-gap'>
             <InfoSection sectionTitle='GE' 
-              linkUrl={`/characters/${characterId}/ge/planner/${item.gameVersion}/${item.id}`}
-              linkText={`Item Planner`}
               button={{
                 className: 'primary',
                 onClick: () => {handleItemRefresh(item.id as string)},
@@ -393,8 +392,6 @@ export default function CharacterGEItems() {
               }
             ]} />
             <InfoSection sectionTitle='History' 
-              linkUrl={`/characters/${characterId}/ge/history/${item.id}`}
-              linkText={`Teleport`}
               button={{
                 className: 'primary',
                 onClick: () => {
@@ -402,7 +399,7 @@ export default function CharacterGEItems() {
                   setShowHistoryModal(true)
                   setHistoryModalItemName(item.name as string)
                 },
-                text: 'History'
+                text: 'Show'
               }}
               items={[
               {

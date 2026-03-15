@@ -494,7 +494,7 @@ button.danger:hover {
 .rs-select {
   font-family: 'Cinzel', serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 1em;
   text-transform: uppercase;
   letter-spacing: 1px;
 

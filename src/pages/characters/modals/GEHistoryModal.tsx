@@ -30,7 +30,7 @@ export default function GEHistoryModal(props: GEHistoryModalProps) {
         <div style={{textWrap: 'wrap', width: '33%', fontSize: 'smaller'}}>
           {dateFormatted}
         </div>
-        <div>
+        <div style={{color: '#FFD700'}}>
           {history.price?.toLocaleString()} GP
         </div>
         <div>

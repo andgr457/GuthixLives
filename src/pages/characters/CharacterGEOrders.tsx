@@ -30,9 +30,6 @@ export default function CharacterGEOrderPlanner() {
     []
   );
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
-  const [item] = useState<CharacterGEItem | undefined>(geItems.find(i => i.characterId === characterId && i.id === itemId))
-  const [itemHistory] = useState<CharacterGEItemHistory[] | undefined>(geItemHistory.filter(h => h.itemId === itemId && h.characterId === characterId))
-  const [itemTransactions] = useState<CharacterGPTransaction[] | undefined>()
   
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
@@ -208,26 +205,11 @@ export default function CharacterGEOrderPlanner() {
         setHistoryModalItems([])
       }}
       onConfirm={() => {}}
-    />
-    <NewGEItemModal 
-      error={newItemModalError}
-      newItemGameVersion={newItemGameVersion}
-      newItemName={newItemName}
-      onCancel={() => {
-        setNewItemName('')
-        setShowNewItemModal(false)
-      }}
-      onConfirm={() => {
-        handleAddItemClicked()
-      }}
-      setNewItemGameVersion={setNewItemGameVersion}
-      setNewItemName={setNewItemName}
-      showNewGEItemModal={showNewItemModal}
-    />  
+    /> 
 
     <div className='list-item-header'>
       <div className='app-title'>
-        Grand Exchange Item Tracker
+        Grand Exchange Orders
       </div>
       <div className='app-title smaller' style={{fontSize: 'x-large'}}>
         {character?.name}
@@ -238,36 +220,54 @@ export default function CharacterGEOrderPlanner() {
       
       <div>
         <div>
-          Search Items
+          Search Orders
         </div>
         <div style={{width: '33vh', paddingBottom: '5px'}}>
           <input 
             onChange={(e) => {setSearch(e.target.value)}} 
             type='text'
-            placeholder='Search item name...'
+            placeholder='Search order title...'
             value={search ?? ''}
             maxLength={16}
             style={{width: '33vh'}}
           />
         </div>
       </div>
-      
+      <div>
+        <div>
+          Search Order Items
+        </div>
+        <div style={{width: '33vh', paddingBottom: '5px'}}>
+          <input 
+            onChange={(e) => {setSearch(e.target.value)}} 
+            type='text'
+            placeholder='Search order title...'
+            value={search ?? ''}
+            maxLength={16}
+            style={{width: '33vh'}}
+          />
+        </div>
+      </div>
       <div>
         <div>
           Actions
         </div>
-        <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
-          Add New Item
-        </button>
-        <button onClick={() => {navigate('/characters')}} className='primary'>
-          Character List
-        </button>
-        <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
-          {showDanger ? 'Hide' : 'Show'} Danger Zones
-        </button>
-        <div>
+        <div className='flex-wrap-gap' style={{gap: '8px'}}>
+           <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+            New Order
+          </button>
+          <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+            New Item
+          </button>
+          <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
+            {showDanger ? 'Hide' : 'Show'} Danger Zones
+          </button>
+          <button style={{}} onClick={() => {navigate('/characters')}} className='button-link'>
+            Character List
+          </button>
         </div>
       </div>
+
       <div>
         
         <div>
@@ -294,7 +294,7 @@ export default function CharacterGEOrderPlanner() {
       </div>
       <div>
         <div>
-          Sort by Name
+          Sort by
         </div>
         <div>
           <button 
@@ -326,8 +326,9 @@ export default function CharacterGEOrderPlanner() {
       </div>
     </div>
     
+    {geItems?.filter(i => i.characterId === characterId).length === 0 && <div className='list-item' style={{marginTop: '20px'}}>There seems to be nothing here. Click "New Order".</div>}
     <div className='list'>
-      {geItems?.sort((a, b) => {
+      {geItems?.filter(i => i.characterId === characterId).sort((a, b) => {
           if (sortOrder === "asc") {
             if (sortField === "name") {
               return (a.name ?? "").localeCompare(b.name ?? "");
