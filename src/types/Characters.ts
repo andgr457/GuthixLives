@@ -1,6 +1,7 @@
 export interface Character {
   id: string
   name: string
+  showListDetail: boolean
   showItems: boolean
   showItemHistory: boolean
   showItemItemId: string | undefined
@@ -32,7 +33,7 @@ export interface CharacterGPTransaction {
 
 export interface CharacterGEOrder {
   id: string
-  characterId: number
+  characterId: string
   title: string
   notes?: string
 }

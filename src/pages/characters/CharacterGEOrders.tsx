@@ -9,13 +9,13 @@ import useScrollReveal from '../../hooks/useScrollReveal'
 import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction, GEItemGameVersion } from '../../types/Characters'
+import CharacterLinks from './CharacterLinks'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
   const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
-  const {itemId} = useParams<{ itemId: string }>();
 
   const [characters] = useLocalStorage<Character[]>(
     CharacterStorageKeys.Characters,
@@ -206,6 +206,21 @@ export default function CharacterGEOrderPlanner() {
       }}
       onConfirm={() => {}}
     /> 
+    <NewGEItemModal 
+      error={newItemModalError}
+      newItemGameVersion={newItemGameVersion}
+      newItemName={newItemName}
+      onCancel={() => {
+        setNewItemName('')
+        setShowNewItemModal(false)
+      }}
+      onConfirm={() => {
+        handleAddItemClicked()
+      }}
+      setNewItemGameVersion={setNewItemGameVersion}
+      setNewItemName={setNewItemName}
+      showNewGEItemModal={showNewItemModal}
+    />  
 
     <div className='list-item-header'>
       <div className='app-title'>
@@ -214,6 +229,8 @@ export default function CharacterGEOrderPlanner() {
       <div className='app-title smaller' style={{fontSize: 'x-large'}}>
         {character?.name}
       </div>
+      <CharacterLinks page='orders' characterId={characterId as string} />
+    
     </div>
     
     <div className='flex-wrap-gap' style={{gap: '10px'}}>
@@ -241,7 +258,7 @@ export default function CharacterGEOrderPlanner() {
           <input 
             onChange={(e) => {setSearch(e.target.value)}} 
             type='text'
-            placeholder='Search order title...'
+            placeholder='Search order items...'
             value={search ?? ''}
             maxLength={16}
             style={{width: '33vh'}}
@@ -261,9 +278,6 @@ export default function CharacterGEOrderPlanner() {
           </button>
           <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
             {showDanger ? 'Hide' : 'Show'} Danger Zones
-          </button>
-          <button style={{}} onClick={() => {navigate('/characters')}} className='button-link'>
-            Character List
           </button>
         </div>
       </div>
@@ -326,8 +340,11 @@ export default function CharacterGEOrderPlanner() {
       </div>
     </div>
     
-    {geItems?.filter(i => i.characterId === characterId).length === 0 && <div className='list-item' style={{marginTop: '20px'}}>There seems to be nothing here. Click "New Order".</div>}
-    <div className='list'>
+    <div style={{padding: '1em'}}>
+      {geItems?.filter(i => i.characterId === characterId).length === 0 && <div 
+        style={{textAlign: 'center'}}
+      >There seems to be nothing here. Click "New Order".
+      </div>}
       {geItems?.filter(i => i.characterId === characterId).sort((a, b) => {
           if (sortOrder === "asc") {
             if (sortField === "name") {
@@ -367,13 +384,28 @@ export default function CharacterGEOrderPlanner() {
           }
         }
         return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
-          <div className='list-item-header'>
-            <div className='app-title'>
+          <div className='list-item-title flex-wrap-gap' style={{gap: '15px'}}>
+            <div>
               {item.name}
             </div>
-            <div className='app-title smaller'>
-              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
+            <div>
+              <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
+                Refresh
+              </button>
             </div>
+            <div>
+              <button onClick={() => {
+                  setHistoryModalItems(historyItems);
+                  setShowHistoryModal(true)
+                  setHistoryModalItemName(item.name as string)
+                }} className='button-link' >
+                History
+              </button>
+            </div>
+          </div>
+
+          <div style={{textAlign: 'center'}}>
+              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
           </div>
 
           <div className='flex-wrap-gap'>

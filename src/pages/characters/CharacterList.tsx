@@ -1,6 +1,6 @@
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useCallback, useRef, useState } from 'react';
-import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction } from '../../types/Characters';
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, CharacterGPTransaction } from '../../types/Characters';
 import '../../styles/Characters.css'
 import { CharacterStorageKeys } from './CharactersConstants';
 import InfoSection from '../core/InfoSection';
@@ -9,8 +9,10 @@ import AppErrorSection from '../core/AppErrorSection';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import useScrollReveal from '../../hooks/useScrollReveal';
 import type { DefaultSetting } from '../../types/Defaults';
+import { useNavigate } from 'react-router-dom';
 
 export default function CharacterList(){
+  const navigate = useNavigate()
   useScrollReveal()
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,11 +33,11 @@ export default function CharacterList(){
     []
   );
 
-  const [geOrders, setGEOrders] = useLocalStorage<CharacterGEItem[]>(
+  const [geOrders, setGEOrders] = useLocalStorage<CharacterGEOrder[]>(
     CharacterStorageKeys.CharactersGEOrders,
     []
   )
-  const [geOrderItems, setGEOrderItems] = useLocalStorage<CharacterGEItemHistory[]>(
+  const [geOrderItems, setGEOrderItems] = useLocalStorage<CharacterGEOrderItem[]>(
     CharacterStorageKeys.CharactersGEOrderItems,
     []
   );
@@ -118,7 +120,8 @@ export default function CharacterList(){
       showItemHistory: false,
       showItemHistoryItemId: undefined,
       showItemItemId: undefined,
-      showItems: false
+      showItems: false,
+      showListDetail: false
     }
     const newCharacters: Character[] = []
     newCharacters.push(newCharacter)
@@ -191,97 +194,113 @@ export default function CharacterList(){
     setTransactions(newTxns)
     setCharacters(newCharacters)
   }, [characters, geItems, geItemHistory, transactions])
+
+  const handleToggleCharacterDetail = useCallback((characterId: string, value: boolean) => {
+    const newCharacters = []
+    for(const character of characters){
+      if(character.id === characterId){
+        character.showListDetail = value
+      }
+      newCharacters.push(character)
+    }
+    setCharacters(newCharacters)
+  }, [characters])
   
   return <div className='characters-app reveal'>
     <div id='top'></div>
-        <div className='list-item-header'>
+    <div>
       <div className='app-title'>
-        Characters List
+        Characters
       </div>
     </div>
 
-    <div className='flex-wrap-gap'>
-      <div>
+    <div className='app-actions'>
+      <div className='flex-wrap-gap'>
         <div>
-          New Character Name
-        </div>
-        <input 
-          onChange={(e) => {setNewCharacterName(e.target.value)}} 
-          type='text'
-          placeholder='Enter character name...'
-          value={newCharacterName ?? ''}
-          maxLength={16}
-          style={{width: '33vh'}}
-        />
-        <br/>
-        <button 
-          style={{ width: '33vh'}}
-          className='primary'
-          onClick={() => {handleAddCharacterClicked()}}
-        >
-          Add <strong>{newCharacterName ?? ''}</strong>
-        </button>
-        <div>
-          <AppErrorSection error={error} />
-        </div>
-      </div>
-      <div>
-        <div>
-          Search Characters
-        </div>
-        <div>
+          <div>
+            New Character Name
+          </div>
           <input 
-            onChange={(e) => {setSearch(e.target.value)}} 
+            onChange={(e) => {setNewCharacterName(e.target.value)}} 
             type='text'
             placeholder='Enter character name...'
-            value={search ?? ''}
+            value={newCharacterName ?? ''}
             maxLength={16}
             style={{width: '33vh'}}
           />
+          <br/>
+          <button 
+            style={{ width: '33vh'}}
+            className='primary'
+            onClick={() => {handleAddCharacterClicked()}}
+          >
+            Add <strong>{newCharacterName ?? ''}</strong>
+          </button>
+          <div>
+            <AppErrorSection error={error} />
+          </div>
+        </div>
+        <div>
+          <div>
+            Search Characters
+          </div>
+          <div>
+            <input 
+              onChange={(e) => {setSearch(e.target.value)}} 
+              type='text'
+              placeholder='Enter character name...'
+              value={search ?? ''}
+              maxLength={16}
+              style={{width: '33vh'}}
+            />
+          </div>
         </div>
       </div>
+      <br/>
+      <div>
+        <div className='flex-wrap-gap'>
+          <div>
+            <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
+              {showDanger ? 'Hide' : 'Show'} Danger Zones
+            </button>
+          </div>
+          <div>
+            <button className="primary" onClick={exportData}>
+              Export
+            </button>
+          </div>
+          <div>
+            <button
+              className="primary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Import
+            </button>
+
+            <input
+              type="file"
+              accept="application/json"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={importData}
+            />
+          </div>
+        </div>
+        {showDanger && <br/>}
+        <div>
+            {showDanger && <div >
+              <button className='danger' onClick={handleResetAllCharcters}>
+                <strong>RESET</strong> All Characters
+              </button>
+              <button className='danger' onClick={handleDeleteAllCharacters}>
+                <strong>DELETE</strong> All Characters
+              </button>
+            </div>}
+          </div>
+      </div>
     </div>
 
-    <br/>
-    
-    <div className='flex-wrap-gap'>
-      <div>
-        <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
-          {showDanger ? 'Hide' : 'Show'} Danger Zones
-        </button>
-      </div>
-      <div>
-        <button className="primary" onClick={exportData}>
-          Export
-        </button>
-      </div>
-      <div>
-        <button
-          className="primary"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Import
-        </button>
-
-        <input
-          type="file"
-          accept="application/json"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={importData}
-        />
-      </div>
-    </div>
-
-    {showDanger && <div className='danger-zone'>
-      <button className='danger' onClick={handleResetAllCharcters}>
-        <strong>RESET</strong> All Characters
-      </button>
-      <button className='danger' onClick={handleDeleteAllCharacters}>
-        <strong>DELETE</strong> All Characters
-      </button>
-    </div>}
-    <div className='list'>
+    <div style={{padding: '1em'}}>
       {characters?.map((character, index) => {
         let filteredOut = false
         if(search && search.length > 0){
@@ -304,59 +323,82 @@ export default function CharacterList(){
           totalGP += txn.amount
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
-          <div className='app-title small left'>
-            {character.name}
-          </div>
-          <div className='flex-wrap-gap'>
-            <InfoSection sectionTitle='GP'
-              linkUrl={`/characters/${character.id}/gp`}
-              linkText={`Teleport`}
-              items={[
-                {
-                  title: 'Total GP',
-                  value: `${totalGP?.toLocaleString() ?? 0}`,
-                  valueHint: 'Aggregate of all character transactions.'
-                },
-                {
-                  title: 'Gain GP',
-                  value: `${totalGain?.toLocaleString() ?? 0}`,
-                  valueHint: 'Total of positive amount transactions.'
-                },
-                {
-                  title: 'Loss GP',
-                  value: `${totalLoss?.toLocaleString() ?? 0}`,
-                  valueHint: 'Total of negative amount transactions.'
-                },
-              ]}
-            />
-            <InfoSection sectionTitle='GE Items' 
-              linkUrl={`/characters/${character.id}/ge-items`}
-              linkText={`Teleport`}
-              items={[
-              {
-                title: 'Items',
-                value: `${relatedItems?.length ?? 0}`,
-                valueHint: 'Number of saved GE tracking items.'
-              },
-              
-            ]} />
-            <InfoSection sectionTitle='GE Orders' 
-              linkUrl={`/characters/${character.id}/ge-orders`}
-              linkText={`Teleport`}
-              items={[
-              {
-                title: 'Orders',
-                value: `${relatedOrders?.length ?? 0}`,
-                valueHint: 'Number of saved GE orders.'
-              },
-            ]} />
-                        
-            <div className='danger-zone' hidden={!showDanger}>              
-              <button key={`btnDeleteCharacter_${character.id}`} className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
-                <strong>DELETE</strong> {character.name}
+          <div className='list-item-title flex-wrap-gap' style={{gap: '8px'}} onClick={() => {
+            }}
+          >
+            <div >
+              <button className='button-link' onClick={() => {handleToggleCharacterDetail(
+                character.id, 
+                typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
+              )}}>
+                {typeof character.showListDetail !== 'undefined' && character.showListDetail === true ? ' - ' : ' + '} {character.name}
+
+              </button>
+            </div>
+            <div>
+              <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
+                Items
+              </button>
+            </div>
+            <div>
+              <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
+                Orders
               </button>
             </div>
           </div>
+
+          {character.showListDetail === true && <div> 
+            <div className='flex-wrap-gap'>
+              <InfoSection sectionTitle='GP'
+                // linkUrl={`/characters/${character.id}/gp`}
+                // linkText={`Teleport`}
+                items={[
+                  {
+                    title: 'Total GP',
+                    value: `${totalGP?.toLocaleString() ?? 0}`,
+                    valueHint: 'Aggregate of all character transactions.'
+                  },
+                  {
+                    title: 'Gain GP',
+                    value: `${totalGain?.toLocaleString() ?? 0}`,
+                    valueHint: 'Total of positive amount transactions.'
+                  },
+                  {
+                    title: 'Loss GP',
+                    value: `${totalLoss?.toLocaleString() ?? 0}`,
+                    valueHint: 'Total of negative amount transactions.'
+                  },
+                ]}
+              />
+              <InfoSection sectionTitle='GE Items' 
+                linkUrl={`/characters/${character.id}/ge-items`}
+                linkText={`Teleport`}
+                items={[
+                {
+                  title: 'Items',
+                  value: `${relatedItems?.length ?? 0}`,
+                  valueHint: 'Number of saved GE tracking items.'
+                },
+                
+              ]} />
+              <InfoSection sectionTitle='GE Orders' 
+                linkUrl={`/characters/${character.id}/ge-orders`}
+                linkText={`Teleport`}
+                items={[
+                {
+                  title: 'Orders',
+                  value: `${relatedOrders?.length ?? 0}`,
+                  valueHint: 'Number of saved GE orders.'
+                },
+              ]} />
+                          
+              <div className='danger-zone' hidden={!showDanger}>              
+                <button key={`btnDeleteCharacter_${character.id}`} className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
+                  <strong>DELETE</strong> {character.name}
+                </button>
+              </div>
+            </div>
+          </div>}
           
         </div>
       })}

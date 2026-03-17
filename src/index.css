@@ -13,22 +13,16 @@
 }
 
 .app-main {
+  padding: 10px;
   margin-top: 65px;
   height: 92vh;
   min-height: fit-content;
   border: #5ec77686 2px solid;
-  border-radius: 10px;
+  border-radius: 3px;
   margin-left: 5px;
   margin-right: 5px;
   margin-bottom: 5px;
-  box-shadow: 0 0 5px #fff
-  ,0 0 5px #fff
-  /* ,0 0 15px #FFD700
-  ,0 0 20px #FFD700
-  ,0 0 25px #FFD700
-  ,0 0 30px #FFD700 */
-  ,0 0 5px #FFD700
-  ;
+
 }
 
 .app-main a {
@@ -60,7 +54,12 @@
   100% { transform: translateX(0); }
 }
 
+.app-actions {
+  padding: 1em;
+}
+
 .app-title {
+  padding: 5px;
   text-align: center;
   letter-spacing: 2px;
   font-size: 2em;
@@ -229,24 +228,35 @@
 }
 
 .list {
+  margin-top: 10px;
+
   box-shadow: 0 0 3px #fff
   ,0 0 6px #fff
   /* ,0 0 15px #FFD700
   ,0 0 20px #FFD700
   ,0 0 25px #FFD700
   ,0 0 30px #FFD700 */
-  ,0 0 9px #FFD700
+  ,0 0 9px #FFD700;
 }
 
-.list div {
-  padding: 6px;
+.list-item-title {
+  background-color: #1e2f22;
+  font-size: 1.5em;
+  padding: 15px;
+  cursor: pointer;
 }
+
+.list-item-title:hover {
+  filter: brightness(1.5);
+  /* background-color: #1e2f22; */
+  /* color: var(--bg-dark) */
+}
+
 
 /* Base visible item */
 .list-item-slow-hide {
   width: 100%;
   height: fit-content;
-  padding: 0.55em;
   border-radius: 10px;
   background-color: #1b1b1b;
 
@@ -462,12 +472,6 @@ button.danger:hover {
   }
 }
 
-
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
 
 .list-item {
   background: var(--panel-light);

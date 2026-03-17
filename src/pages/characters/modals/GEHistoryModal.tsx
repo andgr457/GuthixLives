@@ -20,7 +20,7 @@ export default function GEHistoryModal(props: GEHistoryModalProps) {
   return <Modal
     isOpen={showHistoryModal}
     onClose={props.onClose}
-    title={`${historyModalItemName} Refresh History`}
+    title={`${historyModalItemName} History`}
   >
     {historyModalItems && historyModalItems.map(history => {
       const itemDate = DateTime.fromISO(history.geTimestamp as string).toLocal()

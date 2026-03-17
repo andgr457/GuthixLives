@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { useNavigate, useParams } from 'react-router-dom'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, GEItemGameVersion } from '../../types/Characters'
+import { useParams } from 'react-router-dom'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, GEItemGameVersion } from '../../types/Characters'
 import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
@@ -9,10 +9,11 @@ import InfoSection from '../core/InfoSection'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
+import CharacterLinks from './CharacterLinks'
+import type { DefaultSetting } from '../../types/Defaults'
 
 export default function CharacterGEItems() {
   useScrollReveal()
-  const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
   const [characters] = useLocalStorage<Character[]>(
@@ -27,6 +28,20 @@ export default function CharacterGEItems() {
     CharacterStorageKeys.CharactersGEItemsHistory,
     []
   );
+  const [geOrders] = useLocalStorage<CharacterGEOrder[]>(
+    CharacterStorageKeys.CharactersGEOrders,
+    []
+  )
+  const [geOrderItems] = useLocalStorage<CharacterGEOrderItem[]>(
+    CharacterStorageKeys.CharactersGEOrderItems,
+    []
+  );
+
+  const [defaults, setDefaults] = useLocalStorage<DefaultSetting[]>(
+    CharacterStorageKeys.Defaults,
+    []
+  )
+  
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
@@ -226,6 +241,7 @@ export default function CharacterGEItems() {
       <div className='app-title smaller' style={{fontSize: 'x-large'}}>
         {character?.name}
       </div>
+      <CharacterLinks page='items' characterId={characterId as string} />
     </div>
     
     <div className='flex-wrap-gap' style={{gap: '10px', padding: '1em'}}>
@@ -256,9 +272,6 @@ export default function CharacterGEItems() {
           </button>
           <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
             {showDanger ? 'Hide' : 'Show'} Danger Zones
-          </button>
-          <button style={{}} onClick={() => {navigate('/characters')}} className='button-link'>
-            Character List
           </button>
         </div>
       </div>
@@ -320,8 +333,11 @@ export default function CharacterGEItems() {
       </div>
     </div>
     
-    {geItems?.filter(i => i.characterId === characterId).length === 0 && <div className='list-item' style={{marginTop: '20px'}}>There seems to be nothing here. Click "New Item".</div>}
-    <div className='list'>
+    <div style={{padding: '1em'}}>
+      {geItems?.filter(i => i.characterId === characterId).length === 0 && <div 
+        style={{textAlign: 'center'}}
+      >There seems to be nothing here. Click "New Item".
+      </div>}
       {geItems?.filter(i => i.characterId === characterId).sort((a, b) => {
           if (sortOrder === "asc") {
             if (sortField === "name") {
@@ -346,6 +362,9 @@ export default function CharacterGEItems() {
           return 0;
       }).map((item, index) => {
         const historyItems = geItemHistory.filter(ih => ih.characterId === characterId && ih.itemId === item.id)
+        const relatedOrders = geOrders.filter(o => o.characterId === characterId)
+        const orderIds = relatedOrders.map(o => o.id)
+        const relatedOrderItems = geOrderItems.filter(oi => orderIds.includes(oi.orderId))
 
         let filteredOut = false
         if(search && search.length > 0){
@@ -361,22 +380,37 @@ export default function CharacterGEItems() {
           }
         }
         return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
-          <div className='list-item-header'>
-            <div className='app-title'>
+          <div className='list-item-title flex-wrap-gap' style={{gap: '15px'}}>
+            <div>
               {item.name}
             </div>
-            <div className='app-title smaller'>
-              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
+            <div>
+              <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
+                Refresh
+              </button>
             </div>
+            <div>
+              <button onClick={() => {
+                  setHistoryModalItems(historyItems);
+                  setShowHistoryModal(true)
+                  setHistoryModalItemName(item.name as string)
+                }} className='button-link' >
+                History
+              </button>
+            </div>
+          </div>
+
+          <div style={{textAlign: 'center'}}>
+              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
           </div>
 
           <div className='flex-wrap-gap'>
             <InfoSection sectionTitle='GE' 
-              button={{
-                className: 'primary',
-                onClick: () => {handleItemRefresh(item.id as string)},
-                text: 'Refresh'
-              }}
+              // button={{
+              //   className: 'primary',
+              //   onClick: () => {handleItemRefresh(item.id as string)},
+              //   text: 'Refresh'
+              // }}
               items={[
               {
                 title: 'Price',
@@ -392,20 +426,22 @@ export default function CharacterGEItems() {
               }
             ]} />
             <InfoSection sectionTitle='History' 
-              button={{
-                className: 'primary',
-                onClick: () => {
-                  setHistoryModalItems(historyItems);
-                  setShowHistoryModal(true)
-                  setHistoryModalItemName(item.name as string)
-                },
-                text: 'Show'
-              }}
               items={[
               {
                 title: 'Total',
                 value: `${historyItems?.length?.toLocaleString() ?? 0}`
               },
+            ]} />
+             <InfoSection sectionTitle='Orders' 
+              items={[
+              {
+                title: 'In Orders',
+                value: `${orderIds?.length?.toLocaleString() ?? 0}`
+              },
+              {
+                title: 'Order Lines',
+                value: `${relatedOrderItems.length?.toLocaleString() ?? 0}`
+              }
             ]} />
           </div>
           {showDanger && <div className='danger-zone'>
