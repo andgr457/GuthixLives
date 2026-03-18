@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
@@ -8,12 +8,11 @@ import InfoSection from '../core/InfoSection'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGPTransaction, GEItemGameVersion } from '../../types/Characters'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, CharacterGPTransaction, GEItemGameVersion } from '../../types/Characters'
 import CharacterLinks from './CharacterLinks'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
-  const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
 
@@ -29,10 +28,26 @@ export default function CharacterGEOrderPlanner() {
     CharacterStorageKeys.CharactersGEItemsHistory,
     []
   );
+  const [geOrders, setGEOrders] = useLocalStorage<CharacterGEOrder[]>(
+    CharacterStorageKeys.CharactersGEOrders,
+    []
+  )
+  const [geOrderItems, setGEOrderItems] = useLocalStorage<CharacterGEOrderItem[]>(
+    CharacterStorageKeys.CharactersGEOrderItems,
+    []
+  );
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
   
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
+
+  const [newOrderTitle, setNewOrderTitle] = useState('')
+  const [newOrderNotes, setNewOrderNotes] = useState('')
+  const [newOrderOrderItems, setNewOrderOrderItems] = useState<CharacterGEOrderItem[]>([])
+
+  const [newOrderModalError, setNewOrderModalError] = useState('')
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false)
+
   const [search, setSearch] = useState('')
   const [searchGame, setSearchGame] = useState('both')
   const [showDanger, setShowDanger] = useState(false)
@@ -45,6 +60,60 @@ export default function CharacterGEOrderPlanner() {
 
   const [showNewItemModal, setShowNewItemModal] = useState(false)
   const [newItemModalError, setNewItemModalError] = useState('')
+
+  const handleAddOrderClicked = useCallback(() => {
+    if(!newOrderOrderItems || newOrderOrderItems.length === 0){
+      setNewOrderModalError('At least 1 order item is required.')
+      return
+    }
+    if(!newOrderTitle || !newOrderTitle?.trim()){
+      setNewOrderModalError('Order title is required.')
+      return
+    }
+
+    const title = newOrderTitle.trim()
+    const orderId = `${title}___${DateTime.utc().toMillis()}`
+    const newOrder: CharacterGEOrder = {
+      id: orderId,
+      characterId: characterId as string,
+      title,
+      createdDate: DateTime.utc().toISO(),
+      status: 'Pending',
+      notes: newOrderNotes ? newOrderNotes.trim() : undefined
+    }
+
+    const newOrderItems = []
+    for(const item of newOrderOrderItems){
+      item.orderId = orderId
+      newOrderItems.push(item)
+    }
+    
+    const newOrders = []
+    newOrders.push(newOrder)
+    for(const order of geOrders){
+      newOrders.push(order)
+    }
+    
+    setGEOrders(newOrders)
+    setGEOrderItems(newOrderItems)
+
+    setNewItemName('')
+
+    setNewOrderTitle('')
+    setNewOrderModalError('')
+    setNewOrderNotes('')
+    setNewOrderOrderItems([])
+    setShowNewOrderModal(false)
+  }, [
+    newOrderTitle,
+    newOrderNotes,
+    newItemName,
+    geOrders,
+    geOrderItems,
+    newOrderTitle,
+    newOrderNotes,
+    newOrderOrderItems,
+  ])
 
   const handleAddItemClicked = useCallback(async () => {
     if(!newItemName || !newItemName?.trim()) {
@@ -102,10 +171,11 @@ export default function CharacterGEOrderPlanner() {
       setGEItemHistory(newHistoryItems)
       setNewItemName('')
       setShowNewItemModal(false)
+      setNewItemModalError('')
     }catch(error){
       setNewItemModalError(`${JSON.stringify(error)}`)
     }
-  }, [newItemName, geItems])
+  }, [newItemName, newItemGameVersion, geItems])
 
   const handleItemRefresh = useCallback(async (itemId: string) => {
     const item = geItems?.find(i => i.id === itemId)

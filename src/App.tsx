@@ -14,11 +14,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path='/events' element={<Events />} />
       <Route path='/characters' element={<CharacterList />} />
       <Route path="/characters/:characterId/ge-items" element={<CharacterGEItems />} />
       <Route path="/characters/:characterId/ge-orders" element={<CharacterGEOrderPlanner />} />
-
-      <Route path='/events' element={<Events />} />
+      
       <Route path="/toonplanner" element={<ToonPlanner />} />
       <Route path="/getracker" element={<GETracker />} />
       <Route path='/geplanner' element={<GEPlanner />} />

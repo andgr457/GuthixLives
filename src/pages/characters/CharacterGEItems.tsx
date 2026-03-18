@@ -10,7 +10,6 @@ import useScrollReveal from '../../hooks/useScrollReveal'
 import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
 import CharacterLinks from './CharacterLinks'
-import type { DefaultSetting } from '../../types/Defaults'
 
 export default function CharacterGEItems() {
   useScrollReveal()
@@ -37,11 +36,6 @@ export default function CharacterGEItems() {
     []
   );
 
-  const [defaults, setDefaults] = useLocalStorage<DefaultSetting[]>(
-    CharacterStorageKeys.Defaults,
-    []
-  )
-  
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
   const [newItemName, setNewItemName] = useState('')
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
@@ -114,10 +108,11 @@ export default function CharacterGEItems() {
       setGEItemHistory(newHistoryItems)
       setNewItemName('')
       setShowNewItemModal(false)
+      setNewItemModalError('')
     }catch(error){
       setNewItemModalError(`${JSON.stringify(error)}`)
     }
-  }, [newItemName, geItems])
+  }, [newItemName, newItemGameVersion, geItems])
 
   const handleItemRefresh = useCallback(async (itemId: string) => {
     const item = geItems?.find(i => i.id === itemId)
