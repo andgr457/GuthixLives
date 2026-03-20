@@ -7,7 +7,7 @@ export const CharacterStorageKeys = {
   CharactersGEItems: 'characters-ge-items',
   CharactersGEItemsHistory: 'characters-ge-items-history',
   CharactersGEOrders: 'characters-ge-orders',
-  CharactersGEOrderItems: 'characters-ge-order-items'
+  CharactersGEOrderItems: 'characters-ge-order-items',
 }
 
 export const getGameNameByVersion = (version: GEItemGameVersion): string => {

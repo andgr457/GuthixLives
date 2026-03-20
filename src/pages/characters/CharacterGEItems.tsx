@@ -359,7 +359,7 @@ export default function CharacterGEItems() {
         const historyItems = geItemHistory.filter(ih => ih.characterId === characterId && ih.itemId === item.id)
         const relatedOrders = geOrders.filter(o => o.characterId === characterId)
         const orderIds = relatedOrders.map(o => o.id)
-        const relatedOrderItems = geOrderItems.filter(oi => orderIds.includes(oi.orderId))
+        const relatedOrderItems = geOrderItems.filter(oi => orderIds.includes(oi.orderId as string))
 
         let filteredOut = false
         if(search && search.length > 0){
@@ -395,58 +395,61 @@ export default function CharacterGEItems() {
             </div>
           </div>
 
-          <div style={{textAlign: 'center'}}>
-              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
+          <div className='list-item-body'>
+            <div style={{textAlign: 'center'}}>
+                {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
+            </div>
+
+            <div className='flex-wrap-gap'>
+              <InfoSection sectionTitle='GE' 
+                // button={{
+                //   className: 'primary',
+                //   onClick: () => {handleItemRefresh(item.id as string)},
+                //   text: 'Refresh'
+                // }}
+                items={[
+                {
+                  title: 'Price',
+                  value: `${item.price ? item.price.toLocaleString() : 0} GP`,
+                },
+                {
+                  title: 'Volume',
+                  value: `${item.price ? item.price.toLocaleString() : 0}`,
+                },
+                {
+                  title: 'Last Refresh',
+                  value: `${DateTime.fromISO(item.geTimestamp as string).toLocal().toFormat('dd-MM-yy t')}`
+                }
+              ]} />
+              <InfoSection sectionTitle='History' 
+                items={[
+                {
+                  title: 'Total',
+                  value: `${historyItems?.length?.toLocaleString() ?? 0}`
+                },
+              ]} />
+              <InfoSection sectionTitle='Orders' 
+                items={[
+                {
+                  title: 'In Orders',
+                  value: `${orderIds?.length?.toLocaleString() ?? 0}`
+                },
+                {
+                  title: 'Order Lines',
+                  value: `${relatedOrderItems.length?.toLocaleString() ?? 0}`
+                }
+              ]} />
+            </div>
+            {showDanger && <div className='danger-zone'>
+              <button onClick={() => {handleDeleteItemById(item.id as string)}} className='danger'>
+                <strong>DELETE</strong> {item.name}
+              </button>
+              <button onClick={() => {handleClearItemHistoryByItemId(item.id as string)}} className='danger'>
+                <strong>RESET</strong> History
+              </button>
+            </div>}
           </div>
 
-          <div className='flex-wrap-gap'>
-            <InfoSection sectionTitle='GE' 
-              // button={{
-              //   className: 'primary',
-              //   onClick: () => {handleItemRefresh(item.id as string)},
-              //   text: 'Refresh'
-              // }}
-              items={[
-              {
-                title: 'Price',
-                value: `${item.price ? item.price.toLocaleString() : 0} GP`,
-              },
-              {
-                title: 'Volume',
-                value: `${item.price ? item.price.toLocaleString() : 0}`,
-              },
-              {
-                title: 'Last Refresh',
-                value: `${DateTime.fromISO(item.geTimestamp as string).toLocal().toFormat('dd-MM-yy t')}`
-              }
-            ]} />
-            <InfoSection sectionTitle='History' 
-              items={[
-              {
-                title: 'Total',
-                value: `${historyItems?.length?.toLocaleString() ?? 0}`
-              },
-            ]} />
-             <InfoSection sectionTitle='Orders' 
-              items={[
-              {
-                title: 'In Orders',
-                value: `${orderIds?.length?.toLocaleString() ?? 0}`
-              },
-              {
-                title: 'Order Lines',
-                value: `${relatedOrderItems.length?.toLocaleString() ?? 0}`
-              }
-            ]} />
-          </div>
-          {showDanger && <div className='danger-zone'>
-            <button onClick={() => {handleDeleteItemById(item.id as string)}} className='danger'>
-              <strong>DELETE</strong> {item.name}
-            </button>
-            <button onClick={() => {handleClearItemHistoryByItemId(item.id as string)}} className='danger'>
-              <strong>RESET</strong> History
-            </button>
-          </div>}
         </div>
       })}
     </div>

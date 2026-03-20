@@ -1,18 +1,21 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { useParams } from 'react-router-dom'
-import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
+import { useNavigate, useParams } from 'react-router-dom'
+import { CharacterStorageKeys } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
-import InfoSection from '../core/InfoSection'
+// import InfoSection from '../core/InfoSection'
 import useScrollReveal from '../../hooks/useScrollReveal'
-import GEHistoryModal from './modals/GEHistoryModal'
 import NewGEItemModal from './modals/NewGEItemModal'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, CharacterGPTransaction, GEItemGameVersion } from '../../types/Characters'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, GEItemGameVersion } from '../../types/Characters'
 import CharacterLinks from './CharacterLinks'
+import NewGEOrderModal from './modals/NewGEOrderModal'
+import CharacterGEOrderOrderItem from './CharacterGEOrderOrderItem'
+import InfoSection from '../core/InfoSection'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
+  const navigate = useNavigate()
 
   const {characterId} = useParams<{ characterId: string }>();
 
@@ -36,6 +39,7 @@ export default function CharacterGEOrderPlanner() {
     CharacterStorageKeys.CharactersGEOrderItems,
     []
   );
+
   const [character] = useState<Character | undefined>(characters?.find(c => c.id === characterId))
   
   const [newItemName, setNewItemName] = useState('')
@@ -48,16 +52,14 @@ export default function CharacterGEOrderPlanner() {
   const [newOrderModalError, setNewOrderModalError] = useState('')
   const [showNewOrderModal, setShowNewOrderModal] = useState(false)
 
-  const [search, setSearch] = useState('')
-  const [searchGame, setSearchGame] = useState('both')
+  const [searchOrders, setSearchOrders] = useState('')
+  const [searchOrderItems, setSearchOrderItems] = useState('')
+
+  const [filterStatus, setFiltertatus] = useState('both')
   const [showDanger, setShowDanger] = useState(false)
   const [sortOrder, setSortOrder] = useState<'' | 'asc' | 'desc'>('')
   const [sortField, setSortField] = useState('')
   
-  const [showHistoryModal, setShowHistoryModal] = useState(false)
-  const [historyModalItems, setHistoryModalItems] = useState<CharacterGEItemHistory[]>([])
-  const [historyModalItemName, setHistoryModalItemName] = useState('')
-
   const [showNewItemModal, setShowNewItemModal] = useState(false)
   const [newItemModalError, setNewItemModalError] = useState('')
 
@@ -72,26 +74,34 @@ export default function CharacterGEOrderPlanner() {
     }
 
     const title = newOrderTitle.trim()
-    const orderId = `${title}___${DateTime.utc().toMillis()}`
+    const orderId = `o__${title}__${characterId}__${DateTime.utc().toMillis()}`
     const newOrder: CharacterGEOrder = {
       id: orderId,
       characterId: characterId as string,
       title,
       createdDate: DateTime.utc().toISO(),
       status: 'Pending',
-      notes: newOrderNotes ? newOrderNotes.trim() : undefined
+      notes: newOrderNotes ? newOrderNotes.trim() : undefined,
+      showListDetail: true
     }
 
     const newOrderItems = []
     for(const item of newOrderOrderItems){
       item.orderId = orderId
+      item.showListDetail = false
       newOrderItems.push(item)
     }
     
     const newOrders = []
     newOrders.push(newOrder)
     for(const order of geOrders){
+      order.showListDetail = false
       newOrders.push(order)
+    }
+
+    for(const orderItem of geOrderItems){
+      orderItem.showListDetail = false
+      newOrderItems.push(orderItem)
     }
     
     setGEOrders(newOrders)
@@ -177,105 +187,184 @@ export default function CharacterGEOrderPlanner() {
     }
   }, [newItemName, newItemGameVersion, geItems])
 
-  const handleItemRefresh = useCallback(async (itemId: string) => {
-    const item = geItems?.find(i => i.id === itemId)
-    if(!item) return
+  const handleClearNewOrder = () => {
+    setNewOrderModalError('')
+    setNewOrderNotes('')
+    setNewOrderOrderItems([])
+    setNewOrderTitle('')
+  }
 
-    const geResponse = await fetchGEItem(item?.name as string, item?.gameVersion)
-    console.log(geResponse, item)
-    const priceSame = geResponse.price === item.price
-    
-    const updatedItem: CharacterGEItem = {
-      ...item,
-      price: geResponse.price,
-      volume: geResponse.volume,
-      geTimestamp: DateTime.now().toISO()
-    }
-    const historyItem: CharacterGEItemHistory = {
-      ...updatedItem,
-      id: `H_${updatedItem.id}_${characterId}__${DateTime.now().toMillis()}`,
-      itemId: item.id as string
-    }
-    
-    const newItems = []
-    for(const item of geItems){
-      if(item.id === itemId){
-        newItems.push(updatedItem)
-      } else {
-        newItems.push(item)
+  const handleDeleteOrderById = useCallback((orderId: string) => {
+    if(!confirm('Are you sure you want to delete this order and its order items?')) return
+
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id !== orderId){
+        newOrders.push(order)
+      }
+    }  
+    const newOrderItems = []
+    for(const orderItem of geOrderItems){
+      if(orderItem.orderId !== orderId){
+        newOrderItems.push(orderItem)
       }
     }
-    
-    if(!priceSame){
-      const newHistoryItems = []
-      newHistoryItems.push(historyItem)
-      for(const history of geItemHistory){
-        newHistoryItems.push(history)
+    setGEOrders(newOrders)
+    setGEOrderItems(newOrderItems)
+  }, [geOrders, geOrderItems])
+
+  const handleDeleteOrderItemById = useCallback((orderItemId: string, orderId: string) => {
+    let orderOrderItemCount = 0
+    for(const orderItem of geOrderItems){
+      if(orderItem.orderId === orderId){
+        orderOrderItemCount += 1
       }
-      setGEItemHistory(newHistoryItems)
+    }
+    let deleteOrderToo = false
+    if(orderOrderItemCount === 1){
+      if(!confirm('Are you sure you want to delete this order item?')) return
+      if(confirm('There will be no more order items for this order. Delete the order too?')){
+        deleteOrderToo = true
+      }
+    } else {
+      if(!confirm('Are you sure you want to delete this order item?')) return
     }
 
-    setGEItems(newItems)
-  }, [geItems, geItemHistory])
+    const newOrderItems = []
+    for(const orderItem of geOrderItems){
+      if(orderItem.id !== orderItemId){
+        newOrderItems.push(orderItem)
+      }
+    }
+    setGEOrderItems(newOrderItems)
 
-  const handleDeleteItemById = useCallback((itemId: string) => {
-    if(!itemId) return
-    if(!confirm('Are you sure you want to entirely remove the item (along with all of its history)?')) return
-
-    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
-    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
-    const historyIds = relatedHistoryItems.map(h => h.id)
-
-    if(relatedHistoryItems?.length > 0){
-      const newHistory = []
-      for(const historyItem of geItemHistory){
-        if(!historyIds.includes(historyItem.id)){
-          newHistory.push(historyItem)
+    if(deleteOrderToo === true){
+      const newOrders = []
+      for(const order of geOrders){
+        if(order.id !== orderId){
+          newOrders.push(order)
         }
       }
-      setGEItemHistory(newHistory)
+      setGEOrders(newOrders)
     }
-    const newItems = []
-    for(const item of geItems){
-      if(item.id !== relatedItem?.id){
-        newItems.push(item)
-      }
-    }
-    setGEItems(newItems)
-  }, [geItems, geItemHistory])
+  }, [geOrderItems, geOrders])
 
-  
-  const handleClearItemHistoryByItemId = useCallback((itemId: string) => {
-    if(!itemId) return
-    if(!confirm('Are you sure you want to reset the history for this item?')) return
-    
-    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
-    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
-    const historyIds = relatedHistoryItems.map(h => h.id)
-
-    if(relatedHistoryItems?.length > 0){
-      const newHistory = []
-      for(const historyItem of geItemHistory){
-        if(!historyIds.includes(historyItem.id)){
-          newHistory.push(historyItem)
-        }
+  const handleToggleShowOrderListDetail = useCallback((orderId: string, value: boolean) => {
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.showListDetail = value
       }
-      setGEItemHistory(newHistory)
+      newOrders.push(order)
     }
-  }, [geItems, geItemHistory])
+    setGEOrders(newOrders)
+  }, [geOrders])
+
+  const handleToggleShowOrderItemListDetail = useCallback((orderItemId: string, value: boolean) =>{
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.showListDetail = value
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
+
+  const handleSetOrderItemBoughtPrice = useCallback((orderItemId: string, value: string) =>{
+    const valueNumber = +value
+    if(Number.isNaN(valueNumber)){
+      return
+    }
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.boughtPrice = valueNumber
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
+
+  const handleSetOrderItemBoughtAmount = useCallback((orderItemId: string, value: string) =>{
+    const valueNumber = +value
+    if(Number.isNaN(valueNumber)){
+      return
+    }
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.boughtAmount = valueNumber
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
+
+  const handleSetOrderItemSellPrice = useCallback((orderItemId: string, value: string) =>{
+    const valueNumber = +value
+    if(Number.isNaN(valueNumber)){
+      return
+    }
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.sellPrice = valueNumber
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
+
+  const handleSetOrderItemSellAmount = useCallback((orderItemId: string, value: string) =>{
+    const valueNumber = +value
+    if(Number.isNaN(valueNumber)){
+      return
+    }
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.sellAmount = valueNumber
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
+
+  const handleSetOrderItemIsTaxed = useCallback((orderItemId: string, value: boolean) =>{
+    const newOrderItems = []
+    for(const item of geOrderItems){
+      if(item.id === orderItemId){
+        item.taxed = value
+      }
+      newOrderItems.push(item)
+    }
+    setGEOrderItems(newOrderItems)
+  }, [geOrderItems])
 
   return <div className='characters-app'>
     <div id='top'></div>
-    <GEHistoryModal 
-      showHistoryModal={showHistoryModal}
-      historyModalItemName={historyModalItemName}
-      historyModalItems={historyModalItems}
-      onClose={() => {
-        setShowHistoryModal(false);
-        setHistoryModalItems([])
+    <NewGEOrderModal 
+      characterGEItems={geItems.filter(i => i.characterId === characterId)}
+      newOrderModalError={newOrderModalError}
+      newOrderNotes={newOrderNotes}
+      newOrderOrderItems={newOrderOrderItems}
+      newOrderTitle={newOrderTitle}
+      setNewOrderNotes={setNewOrderNotes}
+      setNewOrderOrderItems={setNewOrderOrderItems}
+      setNewOrderTitle={setNewOrderTitle}
+      showNewOrderModal={showNewOrderModal}
+      onClear={() => {
+        handleClearNewOrder()
       }}
-      onConfirm={() => {}}
-    /> 
+      onCancel={() => {
+        handleClearNewOrder()
+        setShowNewOrderModal(false)
+      }}
+      onConfirm={() => {
+        handleAddOrderClicked()
+      }}
+    />
     <NewGEItemModal 
       error={newItemModalError}
       newItemGameVersion={newItemGameVersion}
@@ -311,10 +400,13 @@ export default function CharacterGEOrderPlanner() {
         </div>
         <div style={{width: '33vh', paddingBottom: '5px'}}>
           <input 
-            onChange={(e) => {setSearch(e.target.value)}} 
+            onChange={(e) => {
+              setSearchOrderItems('')
+              setSearchOrders(e.target.value)
+            }} 
             type='text'
-            placeholder='Search order title...'
-            value={search ?? ''}
+            placeholder='Search orders...'
+            value={searchOrders ?? ''}
             maxLength={16}
             style={{width: '33vh'}}
           />
@@ -326,10 +418,13 @@ export default function CharacterGEOrderPlanner() {
         </div>
         <div style={{width: '33vh', paddingBottom: '5px'}}>
           <input 
-            onChange={(e) => {setSearch(e.target.value)}} 
+            onChange={(e) => {
+              setSearchOrders('')
+              setSearchOrderItems(e.target.value)
+            }} 
             type='text'
             placeholder='Search order items...'
-            value={search ?? ''}
+            value={searchOrderItems ?? ''}
             maxLength={16}
             style={{width: '33vh'}}
           />
@@ -340,7 +435,7 @@ export default function CharacterGEOrderPlanner() {
           Actions
         </div>
         <div className='flex-wrap-gap' style={{gap: '8px'}}>
-           <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+           <button className='primary' onClick={() => {setShowNewOrderModal(true)}}>
             New Order
           </button>
           <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
@@ -355,25 +450,25 @@ export default function CharacterGEOrderPlanner() {
       <div>
         
         <div>
-          Filter Version
+          Filter Status
         </div>
         <button 
-          onClick={() => {setSearchGame('both')}} 
-          className={searchGame === 'both' ? 'primary selected' : 'primary'}
+          onClick={() => {setFiltertatus('both')}} 
+          className={filterStatus === 'both' ? 'primary selected' : 'primary'}
         >
           Both
         </button>
         <button 
-          onClick={() => {setSearchGame('rs')}} 
-          className={searchGame === 'rs' ? 'primary selected' : 'primary'}
+          onClick={() => {setFiltertatus('pending')}} 
+          className={filterStatus === 'pending' ? 'primary selected' : 'primary'}
         >
-          RuneScape 3
+          Pending
         </button>
         <button 
-          onClick={() => {setSearchGame('osrs')}} 
-          className={searchGame === 'osrs' ? 'primary selected' : 'primary'}
+          onClick={() => {setFiltertatus('complete')}} 
+          className={filterStatus === 'complete' ? 'primary selected' : 'primary'}
         >
-          OSRS
+          Complete
         </button>
       </div>
       <div>
@@ -386,12 +481,6 @@ export default function CharacterGEOrderPlanner() {
             className={sortField === 'name' ? 'primary selected' : 'primary'}
           >
             Name
-          </button>
-          <button 
-            onClick={() => {setSortField(sortField === 'price' ? '' : 'price')}} 
-            className={sortField === 'price' ? 'primary selected' : 'primary'}
-          >
-            Price
           </button>
            - 
           <button 
@@ -409,124 +498,203 @@ export default function CharacterGEOrderPlanner() {
         </div>
       </div>
     </div>
-    
+
     <div style={{padding: '1em'}}>
-      {geItems?.filter(i => i.characterId === characterId).length === 0 && <div 
+      {geOrders?.filter(o => o.characterId === characterId).length === 0 && <div 
         style={{textAlign: 'center'}}
-      >There seems to be nothing here. Click "New Order".
+      >There seems to be nothing here. Click "New Order". 
       </div>}
-      {geItems?.filter(i => i.characterId === characterId).sort((a, b) => {
-          if (sortOrder === "asc") {
-            if (sortField === "name") {
-              return (a.name ?? "").localeCompare(b.name ?? "");
-            }
-
-            if (sortField === "price") {
-              return (a.price ?? 0) - (b.price ?? 0);
-            }
+      {geOrders?.filter(o => o.characterId === characterId).sort((a, b) => {
+        if (sortOrder === "asc") {
+          if (sortField === "name") {
+            return (a.title ?? "").localeCompare(b.title ?? "");
           }
+        }
 
-          if (sortOrder === "desc") {
-            if (sortField === "name") {
-              return (b.name ?? "").localeCompare(a.name ?? "");
-            }
-
-            if (sortField === "price") {
-              return (b.price ?? 0) - (a.price ?? 0);
-            }
+        if (sortOrder === "desc") {
+          if (sortField === "title") {
+            return (b.title ?? "").localeCompare(a.title ?? "");
           }
+        }
 
-          return 0;
-      }).map((item, index) => {
-        const historyItems = geItemHistory.filter(ih => ih.characterId === characterId && ih.itemId === item.id)
-
+        return 0;
+      }).map((order, index) => {
+        const relatedOrderItems = geOrderItems.filter(oi => oi.orderId === order.id)
+        const relatedOrderItemItemIds = relatedOrderItems.map(roi => roi.itemId)
+        const relatedGEItems = geItems.filter(i => i.characterId === characterId && relatedOrderItemItemIds.includes(i.id as string))
+        
         let filteredOut = false
-        if(search && search.length > 0){
-          if(!item?.name?.toLowerCase().includes(search?.toLowerCase())){
+        let found = false
+        if(searchOrders){
+          for(const property of Object.getOwnPropertyNames(order)){
+            //@ts-ignore
+            if(`${order[property]}`.toLowerCase().includes(searchOrders)){
+              found = true
+              break
+            }
+          }
+        }
+        if(searchOrderItems){
+          const relatedOrderItems = geOrderItems.filter(oi => oi.orderId === order.id)
+          for(const oi of relatedOrderItems){
+            const relatedGEItem = relatedGEItems.find(i => i.id === oi.itemId)
+            if(relatedGEItem?.name?.toLowerCase().includes(searchOrderItems.toLowerCase())){
+              found = true
+              break
+            }
+
+            for(const property of Object.getOwnPropertyNames(oi)){
+              //@ts-ignore
+              if(`${oi[property]}`.toLowerCase().includes(searchOrderItems.toLowerCase())){
+                found = true
+                break
+              }
+            }
+          }
+        }
+
+        if(!searchOrders && !searchOrderItems){
+          filteredOut = false
+          found = true
+        } else if (searchOrders || searchOrderItems){
+          if(found === true){
+            filteredOut = false
+          } else {
             filteredOut = true
           }
         }
-        if(searchGame !== 'both'){
-          if(searchGame === 'osrs' && item.gameVersion !== 'osrs'){
+        
+        if(filterStatus !== 'both'){
+          if(filterStatus === 'pending' && order.status !== 'Pending'){
             filteredOut = true
-          } else if(searchGame === 'rs' && item.gameVersion !== 'rs'){
+          } else if(filterStatus === 'complete' && order.status !== 'Complete'){
             filteredOut = true
           }
         }
-        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
+        const createdDate = DateTime.fromISO(order.createdDate).toLocal().toFormat('dd-MM-yy t')
+        let completedDate 
+        if(order.completedDate){
+          completedDate = DateTime.fromISO(order.completedDate).toLocal().toFormat('dd-MM-yy t')
+        }
+
+        let totalBought = 0
+        let totalSell = 0
+        let totalGains = 0
+        let totalTax = 0
+
+        relatedOrderItems.forEach((oi) => {
+          let sellPrice = oi.sellPrice * oi.sellAmount
+          if(oi.taxed === true){
+            const taxAmount = sellPrice * .02
+            sellPrice = oi.sellPrice - taxAmount
+            totalTax += taxAmount
+          }
+          totalBought += oi.boughtPrice * oi.boughtAmount
+          totalSell += sellPrice
+          totalGains += sellPrice - oi.boughtPrice
+        })
+
+        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${order.id}__${index}`}>
           <div className='list-item-title flex-wrap-gap' style={{gap: '15px'}}>
             <div>
-              {item.name}
-            </div>
-            <div>
-              <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
-                Refresh
+              <button onClick={() => {handleToggleShowOrderListDetail(order.id, !order.showListDetail)}} className='button-link'>
+                {order.showListDetail === true ? '-' : '+'} {order.title}
               </button>
             </div>
-            <div>
-              <button onClick={() => {
-                  setHistoryModalItems(historyItems);
-                  setShowHistoryModal(true)
-                  setHistoryModalItemName(item.name as string)
-                }} className='button-link' >
-                History
-              </button>
+            <div className='list-item-title-sub flex-wrap-gap' style={{gap: '8px'}}>
+              <div className='list-item-title-status'>
+                {order.status}
+              </div>
+              <div>
+                {createdDate}
+              </div>
+              <div>
+                <button  onClick={() => {navigate(`characters/${characterId}/ge-orders/${order.id}`)}} className='button-link'>
+                  View
+                </button>
+              </div>
             </div>
           </div>
-
-          <div style={{textAlign: 'center'}}>
-              {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
-          </div>
-
-          <div className='flex-wrap-gap'>
-            <InfoSection sectionTitle='GE' 
-              linkUrl={`/characters/${characterId}/ge/planner/${item.gameVersion}/${item.id}`}
-              linkText={`Item Planner`}
-              button={{
-                className: 'primary',
-                onClick: () => {handleItemRefresh(item.id as string)},
-                text: 'Refresh'
-              }}
-              items={[
-              {
-                title: 'Price',
-                value: `${item.price ? item.price.toLocaleString() : 0} GP`,
-              },
-              {
-                title: 'Volume',
-                value: `${item.price ? item.price.toLocaleString() : 0}`,
-              },
-              {
-                title: 'Last Refresh',
-                value: `${DateTime.fromISO(item.geTimestamp as string).toLocal().toFormat('dd-MM-yy t')}`
-              }
-            ]} />
-            <InfoSection sectionTitle='History' 
-              linkUrl={`/characters/${characterId}/ge/history/${item.id}`}
-              linkText={`Teleport`}
-              button={{
-                className: 'primary',
-                onClick: () => {
-                  setHistoryModalItems(historyItems);
-                  setShowHistoryModal(true)
-                  setHistoryModalItemName(item.name as string)
-                },
-                text: 'History'
-              }}
-              items={[
-              {
-                title: 'Total',
-                value: `${historyItems?.length?.toLocaleString() ?? 0}`
-              },
-            ]} />
-          </div>
-          {showDanger && <div className='danger-zone'>
-            <button onClick={() => {handleDeleteItemById(item.id as string)}} className='danger'>
-              <strong>DELETE</strong> {item.name}
-            </button>
-            <button onClick={() => {handleClearItemHistoryByItemId(item.id as string)}} className='danger'>
-              <strong>RESET</strong> History
-            </button>
+          {order.showListDetail === true && <div className='list-item-body'>
+            <div className='flex-wrap-gap'>
+              <InfoSection 
+                sectionTitle='Details'
+                items={[
+                  {
+                    title: 'Status',
+                    value: order.status
+                  },
+                  {
+                    title: 'Created',
+                    value: createdDate
+                  },
+                  {
+                    title: 'Completed',
+                    value: completedDate ?? 'N/A'
+                  }
+                ]}
+              />
+              <InfoSection 
+                sectionTitle='Totals'
+                items={[
+                  {
+                    title: 'Bought',
+                    value: `${totalBought.toLocaleString()} GP`
+                  },
+                  {
+                    title: 'Sell',
+                    value: `${totalSell.toLocaleString()} GP ( ${totalTax.toLocaleString()} GP Tax )`
+                  },
+                  {
+                    title: 'Gains',
+                    value: `${totalGains.toLocaleString()} GP`
+                  }
+                ]}
+              />
+            </div>
+            <div>
+              <div>
+                Notes
+              </div>
+              <input
+                type='text'
+                style={{width: '100%'}}
+                value={order.notes ?? ''}
+                placeholder='Enter notes...'
+                
+              />
+            </div>
+            <div>
+              {showDanger && <div className='danger-zone'>
+                  <button onClick={() => {handleDeleteOrderById(order.id as string)}} className='danger'>
+                    <strong>DELETE ORDER</strong>
+                  </button>
+                </div>}
+            </div>
+            <hr/>
+            {order.showListDetail && <div className='list-item-body'>
+              {relatedOrderItems.map(orderItem => {
+                const relatedItem = relatedGEItems.find(i => i.id === orderItem.itemId) as CharacterGEItem
+                return <div style={{fontSize: '16px', marginLeft: '1em', marginRight: '1em'}}>
+                  <CharacterGEOrderOrderItem 
+                    orderItem={orderItem}
+                    relatedGEItem={relatedItem as CharacterGEItem}
+                    setOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}
+                    setOrderItemBoughtPrice={handleSetOrderItemBoughtPrice}
+                    setOrderItemIsTaxed={handleSetOrderItemIsTaxed}
+                    setOrderItemSellAmount={handleSetOrderItemSellAmount}
+                    setOrderItemSellPrice={handleSetOrderItemSellPrice}
+                    setOrderItemShowListDetail={handleToggleShowOrderItemListDetail}
+                  >
+                    {showDanger && <div className='danger-zone'>
+                      <button onClick={() => {handleDeleteOrderItemById(orderItem.id as string, order.id as string)}} className='danger'>
+                        <strong>DELETE ORDER ITEM</strong>
+                      </button>
+                    </div>}
+                  </CharacterGEOrderOrderItem>
+                </div>
+              })}
+            </div>}
           </div>}
         </div>
       })}

@@ -34,6 +34,7 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
   return <Modal
     isOpen={showHistoryModal}
     onClose={props.onCancel}
+    backdropHides={true}
     title={`New GE Item to Track`}
   >
     <div className='flex-wrap-gap' style={{gap: '1em'}}>

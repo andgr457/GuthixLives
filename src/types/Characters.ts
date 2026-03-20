@@ -45,6 +45,7 @@ export interface CharacterGEOrder {
   status: CharacterGEOrderStatus
   createdDate: string
   completedDate?: string
+  showListDetail: boolean
 }
 
 export interface CharacterGEOrderItem {
@@ -52,6 +53,9 @@ export interface CharacterGEOrderItem {
   orderId: string | undefined
   itemId: string
   boughtPrice: number
+  boughtAmount: number
   sellPrice: number
+  sellAmount: number
   taxed: boolean
+  showListDetail: boolean
 }

@@ -5,14 +5,19 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  backdropHides: boolean
   children: React.ReactNode;
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, backdropHides }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop" onClick={() => {
+      if(backdropHides === true){
+        onClose()
+      }
+    }}>
       <div
         className="modal-container"
         onClick={(e) => e.stopPropagation()}

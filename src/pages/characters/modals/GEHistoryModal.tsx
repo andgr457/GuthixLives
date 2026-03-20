@@ -19,6 +19,7 @@ export default function GEHistoryModal(props: GEHistoryModalProps) {
 
   return <Modal
     isOpen={showHistoryModal}
+    backdropHides={true}
     onClose={props.onClose}
     title={`${historyModalItemName} History`}
   >

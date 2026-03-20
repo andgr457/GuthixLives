@@ -323,10 +323,8 @@ export default function CharacterList(){
           totalGP += txn.amount
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '8px'}} onClick={() => {
-            }}
-          >
-            <div >
+          <div className='list-item-title flex-wrap-gap' style={{gap: '8px'}} onClick={() => {}}>
+            <div>
               <button className='button-link' onClick={() => {handleToggleCharacterDetail(
                 character.id, 
                 typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
@@ -347,7 +345,7 @@ export default function CharacterList(){
             </div>
           </div>
 
-          {character.showListDetail === true && <div> 
+          {character.showListDetail === true && <div className='list-item-body'> 
             <div className='flex-wrap-gap'>
               <InfoSection sectionTitle='GP'
                 // linkUrl={`/characters/${character.id}/gp`}
