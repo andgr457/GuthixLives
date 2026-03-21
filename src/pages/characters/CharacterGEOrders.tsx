@@ -229,7 +229,7 @@ export default function CharacterGEOrderPlanner() {
       'Delete Order Item!'
     )
     if(!ok) return
-    
+
     let orderOrderItemCount = 0
     for(const orderItem of geOrderItems){
       if(orderItem.orderId === orderId){
@@ -408,7 +408,6 @@ export default function CharacterGEOrderPlanner() {
         handleClearNewOrder()
       }}
       onCancel={() => {
-        handleClearNewOrder()
         setShowNewOrderModal(false)
       }}
       onConfirm={() => {

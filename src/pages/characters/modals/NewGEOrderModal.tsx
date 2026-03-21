@@ -149,7 +149,7 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
   return <Modal
     isOpen={props.showNewOrderModal}
     onClose={props.onCancel}
-    backdropHides={false}
+    backdropHides={true}
     title={`New GE Order`}
   >
     <div className='flex-wrap-gap' style={{gap: '1em'}}>
