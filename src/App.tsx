@@ -9,22 +9,25 @@ import GETracker from './pages/ge/GETracker';
 import ToonPlanner from './pages/toon/ToonPlanner';
 import ToonTasks from './pages/toon/ToonTasks';
 import CharacterGEOrderPlanner from './pages/characters/CharacterGEOrders';
+import { ConfirmProvider } from './context/ConfirmProvider';
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path='/events' element={<Events />} />
-      <Route path='/characters' element={<CharacterList />} />
-      <Route path="/characters/:characterId/ge-items" element={<CharacterGEItems />} />
-      <Route path="/characters/:characterId/ge-orders" element={<CharacterGEOrderPlanner />} />
-      
-      <Route path="/toonplanner" element={<ToonPlanner />} />
-      <Route path="/getracker" element={<GETracker />} />
-      <Route path='/geplanner' element={<GEPlanner />} />
-      <Route path="/geplanner/:itemName" element={<GEPlannerItem />} />
-      <Route path='/toonTasks/:toonName' element={<ToonTasks />} />
-      <Route path="*" element={<Home />} />
-    </Routes>
+    <ConfirmProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path='/events' element={<Events />} />
+        <Route path='/characters' element={<CharacterList />} />
+        <Route path="/characters/:characterId/ge-items" element={<CharacterGEItems />} />
+        <Route path="/characters/:characterId/ge-orders" element={<CharacterGEOrderPlanner />} />
+        
+        <Route path="/toonplanner" element={<ToonPlanner />} />
+        <Route path="/getracker" element={<GETracker />} />
+        <Route path='/geplanner' element={<GEPlanner />} />
+        <Route path="/geplanner/:itemName" element={<GEPlannerItem />} />
+        <Route path='/toonTasks/:toonName' element={<ToonTasks />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </ConfirmProvider>
   );
 }

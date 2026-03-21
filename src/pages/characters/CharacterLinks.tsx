@@ -11,7 +11,7 @@ export default function CharacterLinks(props: CharacterLinksProps) {
   const bright = {filter: 'brightness(1.5)'}
   const normal = {filter: 'brightness(1)'}
 
-  return <div className='flex-wrap-gap' style={{gap: '15px'}}>
+  return <div style={{textAlign: 'center'}}>
 
     <button 
       className='button-link' 
@@ -22,7 +22,7 @@ export default function CharacterLinks(props: CharacterLinksProps) {
     >
       Characters
     </button>
-
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <button 
       className='button-link' 
       style={
@@ -32,7 +32,7 @@ export default function CharacterLinks(props: CharacterLinksProps) {
     >
       Items
     </button>
-
+    &nbsp;&nbsp;&nbsp;&nbsp;
     <button 
       className='button-link'
       style={

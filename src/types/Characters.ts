@@ -17,6 +17,7 @@ export interface CharacterGEItem {
   volume?: number
   geTimestamp?: string;
   gameVersion?: GEItemGameVersion
+  showItemDetail: boolean
 }
 
 export interface CharacterGEItemHistory extends CharacterGEItem {
@@ -46,6 +47,8 @@ export interface CharacterGEOrder {
   createdDate: string
   completedDate?: string
   showListDetail: boolean
+  showListOrderItems: boolean
+  editNotes: boolean
 }
 
 export interface CharacterGEOrderItem {

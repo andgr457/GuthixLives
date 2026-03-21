@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { CharacterStorageKeys } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
-// import InfoSection from '../core/InfoSection'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import NewGEItemModal from './modals/NewGEItemModal'
 import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, GEItemGameVersion } from '../../types/Characters'
@@ -12,10 +11,13 @@ import CharacterLinks from './CharacterLinks'
 import NewGEOrderModal from './modals/NewGEOrderModal'
 import CharacterGEOrderOrderItem from './CharacterGEOrderOrderItem'
 import InfoSection from '../core/InfoSection'
+import '../../styles/Parchment.css'
+import { useConfirm } from '../../context/ConfirmProvider'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
   const navigate = useNavigate()
+  const showConfirm = useConfirm()
 
   const {characterId} = useParams<{ characterId: string }>();
 
@@ -82,7 +84,9 @@ export default function CharacterGEOrderPlanner() {
       createdDate: DateTime.utc().toISO(),
       status: 'Pending',
       notes: newOrderNotes ? newOrderNotes.trim() : undefined,
-      showListDetail: true
+      showListDetail: true,
+      showListOrderItems: false,
+      editNotes: false,
     }
 
     const newOrderItems = []
@@ -146,7 +150,8 @@ export default function CharacterGEOrderPlanner() {
         name: itemName,
         characterId: characterId as string,
         geTimestamp: DateTime.utc().toISO(),
-        gameVersion: newItemGameVersion as GEItemGameVersion
+        gameVersion: newItemGameVersion as GEItemGameVersion,
+        showItemDetail: false
       }
   
       const geResponse = await fetchGEItem(newItem?.name as string, newItem.gameVersion)
@@ -166,7 +171,8 @@ export default function CharacterGEOrderPlanner() {
         characterId: newItem.characterId,
         gameVersion: newItem.gameVersion,
         price: newItem.price,
-        volume: newItem.volume
+        volume: newItem.volume,
+        showItemDetail: newItem.showItemDetail
       }
       newHistoryItems.push(historyItem)
 
@@ -194,9 +200,13 @@ export default function CharacterGEOrderPlanner() {
     setNewOrderTitle('')
   }
 
-  const handleDeleteOrderById = useCallback((orderId: string) => {
-    if(!confirm('Are you sure you want to delete this order and its order items?')) return
-
+  const handleDeleteOrderById = useCallback(async (orderId: string) => {
+    const ok = await showConfirm(
+      'Are you sure you want to delete this order and its order items?',
+      'Delete Order & Order Items!'
+    )
+    if(!ok) return
+    
     const newOrders = []
     for(const order of geOrders){
       if(order.id !== orderId){
@@ -213,7 +223,13 @@ export default function CharacterGEOrderPlanner() {
     setGEOrderItems(newOrderItems)
   }, [geOrders, geOrderItems])
 
-  const handleDeleteOrderItemById = useCallback((orderItemId: string, orderId: string) => {
+  const handleDeleteOrderItemById = useCallback(async (orderItemId: string, orderId: string) => {
+    const ok = await showConfirm(
+      'Are you sure you want to delete this order item?',
+      'Delete Order Item!'
+    )
+    if(!ok) return
+    
     let orderOrderItemCount = 0
     for(const orderItem of geOrderItems){
       if(orderItem.orderId === orderId){
@@ -222,12 +238,13 @@ export default function CharacterGEOrderPlanner() {
     }
     let deleteOrderToo = false
     if(orderOrderItemCount === 1){
-      if(!confirm('Are you sure you want to delete this order item?')) return
-      if(confirm('There will be no more order items for this order. Delete the order too?')){
+      const ok = await showConfirm(
+        'There will be no more order items for this order. Delete the order too?',
+        'Delete Order & Order Items!'
+      )
+      if(ok === true){
         deleteOrderToo = true
       }
-    } else {
-      if(!confirm('Are you sure you want to delete this order item?')) return
     }
 
     const newOrderItems = []
@@ -248,6 +265,39 @@ export default function CharacterGEOrderPlanner() {
       setGEOrders(newOrders)
     }
   }, [geOrderItems, geOrders])
+
+  const handleSetOrderNotes = useCallback((orderId: string, value: string) => {
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.notes = value
+      }
+      newOrders.push(order)
+    }
+    setGEOrders(newOrders)
+  }, [geOrders])
+
+  const handleToggleOrderEditNotes = useCallback((orderId: string, value: boolean) => {
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.editNotes = value
+      }
+      newOrders.push(order)
+    }
+    setGEOrders(newOrders)
+  }, [geOrders])
+
+  const handleToggleShowOrderListOrderItems = useCallback((orderId: string, value: boolean) => {
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.showListOrderItems = value
+      }
+      newOrders.push(order)
+    }
+    setGEOrders(newOrders)
+  }, [geOrders])
 
   const handleToggleShowOrderListDetail = useCallback((orderId: string, value: boolean) => {
     const newOrders = []
@@ -435,13 +485,13 @@ export default function CharacterGEOrderPlanner() {
           Actions
         </div>
         <div className='flex-wrap-gap' style={{gap: '8px'}}>
-           <button className='primary' onClick={() => {setShowNewOrderModal(true)}}>
+           <button className='button-link action do' onClick={() => {setShowNewOrderModal(true)}}>
             New Order
           </button>
-          <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+          <button className='button-link action do' onClick={() => {setShowNewItemModal(true)}}>
             New Item
           </button>
-          <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
+          <button className='button-link action danger' onClick={() => {setShowDanger(!showDanger)}}>
             {showDanger ? 'Hide' : 'Show'} Danger Zones
           </button>
         </div>
@@ -454,19 +504,19 @@ export default function CharacterGEOrderPlanner() {
         </div>
         <button 
           onClick={() => {setFiltertatus('both')}} 
-          className={filterStatus === 'both' ? 'primary selected' : 'primary'}
+          className={filterStatus === 'both' ? 'button-link action selected' : 'button-link action'}
         >
           Both
         </button>
         <button 
           onClick={() => {setFiltertatus('pending')}} 
-          className={filterStatus === 'pending' ? 'primary selected' : 'primary'}
+          className={filterStatus === 'pending' ? 'button-link action selected' : 'button-link action'}
         >
           Pending
         </button>
         <button 
           onClick={() => {setFiltertatus('complete')}} 
-          className={filterStatus === 'complete' ? 'primary selected' : 'primary'}
+          className={filterStatus === 'complete' ? 'button-link action selected' : 'button-link action'}
         >
           Complete
         </button>
@@ -478,20 +528,20 @@ export default function CharacterGEOrderPlanner() {
         <div>
           <button 
             onClick={() => {setSortField(sortField === 'name' ? '' : 'name')}} 
-            className={sortField === 'name' ? 'primary selected' : 'primary'}
+            className={sortField === 'name' ? 'button-link action selected' : 'button-link action'}
           >
             Name
           </button>
            - 
           <button 
             onClick={() => {setSortOrder(sortOrder === 'asc' ? '' : 'asc')}} 
-            className={sortOrder === 'asc' ? 'primary selected' : 'primary'}
+            className={sortOrder === 'asc' ? 'button-link action selected' : 'button-link action'}
           >
             ASC
           </button>
           <button 
             onClick={() => {setSortOrder(sortOrder === 'desc' ? '' : 'desc')}} 
-            className={sortOrder === 'desc' ? 'primary selected' : 'primary'}
+            className={sortOrder === 'desc' ? 'button-link action selected' : 'button-link action'}
           >
             DESC
           </button>
@@ -571,10 +621,10 @@ export default function CharacterGEOrderPlanner() {
             filteredOut = true
           }
         }
-        const createdDate = DateTime.fromISO(order.createdDate).toLocal().toFormat('dd-MM-yy t')
+        const createdDate = DateTime.fromISO(order.createdDate).toLocal().toFormat('dd-MM-yy')
         let completedDate 
         if(order.completedDate){
-          completedDate = DateTime.fromISO(order.completedDate).toLocal().toFormat('dd-MM-yy t')
+          completedDate = DateTime.fromISO(order.completedDate).toLocal().toFormat('dd-MM-yy')
         }
 
         let totalBought = 0
@@ -594,25 +644,20 @@ export default function CharacterGEOrderPlanner() {
           totalGains += sellPrice - oi.boughtPrice
         })
 
-        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${order.id}__${index}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '15px'}}>
+        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}`} key={`${order.id}__${index}`}>
+          <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}}>
             <div>
-              <button onClick={() => {handleToggleShowOrderListDetail(order.id, !order.showListDetail)}} className='button-link'>
+              <button 
+                onClick={() => {handleToggleShowOrderListDetail(order.id, !order.showListDetail)}} 
+                className='button-link collapse'
+              >
                 {order.showListDetail === true ? '-' : '+'} {order.title}
               </button>
             </div>
-            <div className='list-item-title-sub flex-wrap-gap' style={{gap: '8px'}}>
-              <div className='list-item-title-status'>
-                {order.status}
-              </div>
-              <div>
-                {createdDate}
-              </div>
-              <div>
-                <button  onClick={() => {navigate(`characters/${characterId}/ge-orders/${order.id}`)}} className='button-link'>
-                  View
-                </button>
-              </div>
+            <div>
+              <button  onClick={() => {navigate(`characters/${characterId}/ge-orders/${order.id}`)}} className='button-link'>
+                View
+              </button>
             </div>
           </div>
           {order.showListDetail === true && <div className='list-item-body'>
@@ -643,7 +688,11 @@ export default function CharacterGEOrderPlanner() {
                   },
                   {
                     title: 'Sell',
-                    value: `${totalSell.toLocaleString()} GP ( ${totalTax.toLocaleString()} GP Tax )`
+                    value: `${totalSell.toLocaleString()} GP`
+                  },
+                  {
+                    title: 'Tax',
+                    value: `${totalTax.toLocaleString()} GP`
                   },
                   {
                     title: 'Gains',
@@ -652,49 +701,81 @@ export default function CharacterGEOrderPlanner() {
                 ]}
               />
             </div>
-            <div>
-              <div>
-                Notes
+            <div style={{padding: '1em'}}>
+              <div className='list-item-title second' style={{fontSize: '1em'}}>
+                Notes {!order.editNotes ? <button onClick={() => {handleToggleOrderEditNotes(order.id as string, !(order.editNotes ?? false))}} className='button-link collapse'>
+                  Edit
+                </button> : null}
               </div>
-              <input
-                type='text'
-                style={{width: '100%'}}
-                value={order.notes ?? ''}
+              {order.editNotes === true && <textarea 
+                onFocus={(e) => {
+                  e.currentTarget.style.height = ''
+                }}
+                onChange={(e) => {handleSetOrderNotes(order.id as string, e.currentTarget.value)}}
+                onBlur={(e) => {
+                  e.currentTarget.style.height = ''
+                  handleToggleOrderEditNotes(order.id as string, false)
+                }} 
+                style={{width: '100%'}} 
+                rows={2} 
+                cols={50}
                 placeholder='Enter notes...'
-                
-              />
+              >
+                {order.notes ?? ''}
+              </textarea>}
+              {!order.editNotes && order.notes && <div 
+                className='parchment'
+              >
+                {order.notes ?? ''}  
+              </div>}
+              <div>
+                {showDanger && <br/>}
+                {showDanger && <div className='danger-zone'>
+                    <button 
+                      className='button-link action danger'
+                      onClick={() => {handleDeleteOrderById(order.id as string)}} 
+                      >
+                      Delete Order
+                    </button>
+                  </div>}
+              </div>
             </div>
-            <div>
-              {showDanger && <div className='danger-zone'>
-                  <button onClick={() => {handleDeleteOrderById(order.id as string)}} className='danger'>
-                    <strong>DELETE ORDER</strong>
-                  </button>
-                </div>}
+            <div style={{padding: '1em'}}>
+              <div 
+                onClick={() => {handleToggleShowOrderListOrderItems(order.id as string, !order.showListOrderItems)}} 
+                className='list-item-title second' 
+              >
+                <button className='button-link collapse'>
+                  {order.showListOrderItems ? '-' : '+'} {relatedOrderItems.length} Order Item(s)
+                </button>
+              </div>
+              {order.showListOrderItems && <div className='list-item-body'>
+                {relatedOrderItems.map(orderItem => {
+                  const relatedItem = relatedGEItems.find(i => i.id === orderItem.itemId) as CharacterGEItem
+                  return <div style={{fontSize: '1.2em', marginLeft: '.2em', marginRight: '.2em'}}>
+                    <CharacterGEOrderOrderItem 
+                      orderItem={orderItem}
+                      relatedGEItem={relatedItem as CharacterGEItem}
+                      setOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}
+                      setOrderItemBoughtPrice={handleSetOrderItemBoughtPrice}
+                      setOrderItemIsTaxed={handleSetOrderItemIsTaxed}
+                      setOrderItemSellAmount={handleSetOrderItemSellAmount}
+                      setOrderItemSellPrice={handleSetOrderItemSellPrice}
+                      setOrderItemShowListDetail={handleToggleShowOrderItemListDetail}
+                    >
+                      {showDanger && <div className='danger-zone'>
+                        <button 
+                          onClick={() => {handleDeleteOrderItemById(orderItem.id as string, order.id as string)}} 
+                          className='button-link action danger'
+                        >
+                          Delete Order Item
+                        </button>
+                      </div>}
+                    </CharacterGEOrderOrderItem>
+                  </div>
+                })}
+              </div>}
             </div>
-            <hr/>
-            {order.showListDetail && <div className='list-item-body'>
-              {relatedOrderItems.map(orderItem => {
-                const relatedItem = relatedGEItems.find(i => i.id === orderItem.itemId) as CharacterGEItem
-                return <div style={{fontSize: '16px', marginLeft: '1em', marginRight: '1em'}}>
-                  <CharacterGEOrderOrderItem 
-                    orderItem={orderItem}
-                    relatedGEItem={relatedItem as CharacterGEItem}
-                    setOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}
-                    setOrderItemBoughtPrice={handleSetOrderItemBoughtPrice}
-                    setOrderItemIsTaxed={handleSetOrderItemIsTaxed}
-                    setOrderItemSellAmount={handleSetOrderItemSellAmount}
-                    setOrderItemSellPrice={handleSetOrderItemSellPrice}
-                    setOrderItemShowListDetail={handleToggleShowOrderItemListDetail}
-                  >
-                    {showDanger && <div className='danger-zone'>
-                      <button onClick={() => {handleDeleteOrderItemById(orderItem.id as string, order.id as string)}} className='danger'>
-                        <strong>DELETE ORDER ITEM</strong>
-                      </button>
-                    </div>}
-                  </CharacterGEOrderOrderItem>
-                </div>
-              })}
-            </div>}
           </div>}
         </div>
       })}

@@ -5,7 +5,13 @@ export default function Home() {
   useScrollReveal()
   useMousePositionCSS()
   return <div>
-    <div className='app-title'>
+    <div onClick={() => {
+      if(confirm('Are you sure?')){
+        //yes
+      } else {
+        //no
+      }
+    }} className='app-title'>
       Welcome
     </div>
     <div className='basic-list reveal'>

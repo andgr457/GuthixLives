@@ -6,7 +6,6 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { getDiffBetweenNowAndDate, getLocalDateAndTime } from '../../services/common/Dates.service';
 import { fetchGEItem } from '../../services/ge/GE.service';
 import type { GEItemData } from '../../types/Item';
-import '../../styles/GE.css'
 
 export default function GETracker() {
   const navigate = useNavigate();
@@ -163,12 +162,12 @@ export default function GETracker() {
   }
 
   return (
-    <div className="parchment" style={{marginLeft: '1em', marginRight: '1em'}}>
-      <div className='event-title'>GE Tracker</div>
-      <div className='parchment inner-parchment'>
-        <div>
+    <div className="container">
+      <div className="panel">
+        <h1>GE Tracker</h1>
+
           New Item Name (exact spacing)<br/>
-        
+        <div className="input-row">
           <input
             type="text"
             placeholder="Enter item name. Auto-formats for RS naming."
@@ -180,57 +179,64 @@ export default function GETracker() {
             Add
           </button>
         </div>
-        
-      </div>
-      <div className='parchment'>
-        
-        <button className="primary" onClick={exportItems}>
-          Export
-        </button>
-        <button
-          className="primary"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Import
-        </button>
 
-        <input
-          type="file"
-          accept="application/json"
-          ref={fileInputRef}
-          style={{ display: "none" }}
-          onChange={importItems}
-        />
+        <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem" }}>
+          
+          <button className="primary" onClick={exportItems}>
+            Export
+          </button>
 
-        <button
-          className="primary"
-          onClick={handleDashboardClicked}
-        >
-          Planner Dashboard
-        </button>
+          <button
+            className="primary"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Import
+          </button>
 
-        <div style={{fontSize: 'smaller'}}>
-          History only stores when prices change from currently stored values.
+          <input
+            type="file"
+            accept="application/json"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={importItems}
+          />
+
+          <button
+            className="primary"
+            onClick={handleDashboardClicked}
+          >
+            Planner Dashboard
+          </button>
+
+          <div style={{fontSize: 'smaller'}}>
+            History only stores when prices change from currently stored values.
+          </div>
+          <button className="danger" onClick={clearAllHistory}>
+            Clear All History
+          </button>
         </div>
-        <button className="danger" onClick={clearAllHistory}>
-          Clear All History
-        </button>
-      </div>
-      
 
-      <div className="ge-item-list">
+        <ul className="list">
           {items.map((item, index) => (
             <>
-            <div className='ge-item' key={`${item.id}_${index}`}>
-              <div className='ge-item-header'>
-                {item.name}
-              </div>
-              <div>
-                {item.price?.toLocaleString() ?? 'Unknown'} GP
-              </div>
-              <div className="button-row" style={{}}>
+            <li key={index} className="list-item">
+              <table style={{width: '100%'}}>
+                <tbody>
+                  <tr>
+                    <td style={{width: '50%'}}>
+                      {item.name} 
+                    </td>
+                    <td style={{letterSpacing: '2px'}}>
+                      {item.price ? `${item.price.toLocaleString()} GP` : ''}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <hr />
+
+              <div className="button-row">
                 {/* Left-side buttons */}
-                <div>
+                <div className="button-group">
                   <button
                     className="primary"
                     onClick={() => refreshOne(item.name as string)}
@@ -252,7 +258,7 @@ export default function GETracker() {
                 </div>
 
                 {/* Right-side danger buttons */}
-                <div>
+                <div className="button-group">
                   <button
                     className="danger"
                     onClick={() => removeItem(item.name)}
@@ -267,9 +273,10 @@ export default function GETracker() {
                   </button>
                 </div>
               </div>
-            </div>
+
+            </li>
             {showHistory?.get(item.name) === true && (
-              <div className="ge-item-list">
+              <ul className="list">
                 {history
                   .filter((h) => h.name === item.name)
                   .map((h, i) => {
@@ -278,11 +285,11 @@ export default function GETracker() {
                     );
 
                     return (
-                      <div
+                      <li
                         key={`${item.name}_${i}`}
-                        className="ge-item"
+                        className="sub-list-item"
                       >
-                        <table style={{ width: "100%", tableLayout: 'auto' }}>
+                        <table style={{ width: "100%" }}>
                           <tbody>
                             <tr>
                               <td>{h.name}</td>
@@ -305,14 +312,15 @@ export default function GETracker() {
                             </tr>
                           </tbody>
                         </table>
-                      </div>
+                      </li>
                     );
                   })}
-              </div>
+              </ul>
             )}
 
             </>
           ))}
+        </ul>
       </div>
     </div>
   );

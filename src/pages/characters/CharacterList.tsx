@@ -8,10 +8,11 @@ import { DateTime } from 'luxon';
 import AppErrorSection from '../core/AppErrorSection';
 import { useKeyPress } from '../../hooks/useKeyPress';
 import useScrollReveal from '../../hooks/useScrollReveal';
-import type { DefaultSetting } from '../../types/Defaults';
 import { useNavigate } from 'react-router-dom';
+import { useConfirm } from '../../context/ConfirmProvider';
 
 export default function CharacterList(){
+  const showConfirm = useConfirm();
   const navigate = useNavigate()
   useScrollReveal()
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,15 +43,11 @@ export default function CharacterList(){
     []
   );
 
-  const [defaults, setDefaults] = useLocalStorage<DefaultSetting[]>(
-    CharacterStorageKeys.Defaults,
-    []
-  )
-
   const [newCharacterName, setNewCharacterName] = useState<string | undefined>('')
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [showDanger, setShowDanger] = useState(false)
+
   const handleEnterPress = () => {
     handleAddCharacterClicked()
   };
@@ -63,7 +60,7 @@ export default function CharacterList(){
       geItemHistory,
       geOrders,
       geOrderItems,
-      defaults
+      transactions
     }, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -91,7 +88,7 @@ export default function CharacterList(){
         setGEItemHistory(parsed.geItemHistory)
         setGEOrderItems(parsed.geOrderItems)
         setGEOrders(parsed.geOrders)
-        setDefaults(parsed.defaults)
+        setTransactions(parsed.transactions)
       } catch {
         alert("Failed to parse JSON.");
       }
@@ -132,24 +129,26 @@ export default function CharacterList(){
     setCharacters(newCharacters)
   }, [characters, newCharacterName])
 
-  const handleDeleteAllCharacters = useCallback(() => {
-    if(!confirm('Are you sure you want to delete all characters? This cannot be undone and you should save an export.')) return
+  const handleDeleteEverything = useCallback(async () => {
+    if(!await showConfirm(
+      "Are you sure you want to delete everything?", 
+      'Delete Everything!'
+    )) return
+
+    setGEOrderItems([])
+    setGEOrders([])
     setGEItems([])
     setGEItemHistory([])
     setTransactions([])
     setCharacters([])
   }, [])
 
-  const handleResetAllCharcters = useCallback(() => {
-    if(!confirm('Are you sure you want to reset all characters? This will keep just characters, cannot be undone, and you should save an export.')) return
-    setGEItems([])
-    setGEItemHistory([])
-    setTransactions([])
-  }, [characters, geItems, geItemHistory, transactions])
-
-  const handleDeleteDataByCharacterId = useCallback((characterId: string) => {
-    console.log(characterId)
-    if(!confirm(`Are you sure you want to delete this character? This cannot be undone and you should save an export.`)) return
+  const handleDeleteDataByCharacterId = useCallback(async (characterId: string) => {
+    if(!await showConfirm(
+      "Are you sure you want to delete this character?", 
+      'Delete Character!'
+    )) return
+    // if(!confirm(`Are you sure you want to delete this character? This cannot be undone and you should save an export.`)) return
     const relatedItems = geItems?.filter(i => i.characterId === characterId)
     const itemIds = relatedItems?.map(i => i.id)
     const relatedHistory = geItemHistory?.filter(ih => itemIds.includes(ih.itemId))
@@ -230,8 +229,7 @@ export default function CharacterList(){
           />
           <br/>
           <button 
-            style={{ width: '33vh'}}
-            className='primary'
+            className='button-link action'
             onClick={() => {handleAddCharacterClicked()}}
           >
             Add <strong>{newCharacterName ?? ''}</strong>
@@ -256,22 +254,21 @@ export default function CharacterList(){
           </div>
         </div>
       </div>
-      <br/>
       <div>
         <div className='flex-wrap-gap'>
           <div>
-            <button className='primary' onClick={() => {setShowDanger(!showDanger)}}>
+            <button className='button-link action danger' onClick={() => {setShowDanger(!showDanger)}}>
               {showDanger ? 'Hide' : 'Show'} Danger Zones
             </button>
           </div>
           <div>
-            <button className="primary" onClick={exportData}>
+            <button className="button-link action" onClick={exportData}>
               Export
             </button>
           </div>
           <div>
             <button
-              className="primary"
+              className="button-link action"
               onClick={() => fileInputRef.current?.click()}
             >
               Import
@@ -288,12 +285,9 @@ export default function CharacterList(){
         </div>
         {showDanger && <br/>}
         <div>
-            {showDanger && <div >
-              <button className='danger' onClick={handleResetAllCharcters}>
-                <strong>RESET</strong> All Characters
-              </button>
-              <button className='danger' onClick={handleDeleteAllCharacters}>
-                <strong>DELETE</strong> All Characters
+            {showDanger && <div className='danger-zone'>
+              <button className='button-link action danger' onClick={handleDeleteEverything}>
+                Delete All Data
               </button>
             </div>}
           </div>
@@ -323,9 +317,9 @@ export default function CharacterList(){
           totalGP += txn.amount
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '8px'}} onClick={() => {}}>
+          <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}} onClick={() => {}}>
             <div>
-              <button className='button-link' onClick={() => {handleToggleCharacterDetail(
+              <button className='button-link collapse' onClick={() => {handleToggleCharacterDetail(
                 character.id, 
                 typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
               )}}>
@@ -369,8 +363,6 @@ export default function CharacterList(){
                 ]}
               />
               <InfoSection sectionTitle='GE Items' 
-                linkUrl={`/characters/${character.id}/ge-items`}
-                linkText={`Teleport`}
                 items={[
                 {
                   title: 'Items',
@@ -380,8 +372,6 @@ export default function CharacterList(){
                 
               ]} />
               <InfoSection sectionTitle='GE Orders' 
-                linkUrl={`/characters/${character.id}/ge-orders`}
-                linkText={`Teleport`}
                 items={[
                 {
                   title: 'Orders',
@@ -391,8 +381,13 @@ export default function CharacterList(){
               ]} />
                           
               <div className='danger-zone' hidden={!showDanger}>              
-                <button key={`btnDeleteCharacter_${character.id}`} className='danger' onClick={() => {handleDeleteDataByCharacterId(character.id)}}>
-                  <strong>DELETE</strong> {character.name}
+                <button 
+                  key={`btnDeleteCharacter_${character.id}`} 
+                  className='button-link action danger' 
+                  onClick={() => {handleDeleteDataByCharacterId(character.id)}}
+                  title={`Delete ${character?.name}`}
+                >
+                  Delete
                 </button>
               </div>
             </div>

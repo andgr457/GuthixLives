@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CharacterGEItem, CharacterGEOrderItem } from '../../../types/Characters'
 import Modal from '../../core/Modal'
 import { DateTime } from 'luxon'
@@ -22,7 +22,14 @@ interface NewGEOrderModalProps {
 }
 
 export default function NewGEOrderModal(props: NewGEOrderModalProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [selectedItemId, setSelectedItemId] = useState('')
+
+  useEffect(() => {
+    if (props.showNewOrderModal) {
+      inputRef.current?.focus();
+    }
+  }, [props.showNewOrderModal]);
 
   const handleAddOrderItem = useCallback(() => {
     if(!selectedItemId) return
@@ -152,10 +159,11 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
         </div>
         <div>
           <input 
+            ref={inputRef}
             style={{width: '33vh'}}
             onChange={(e) => {props.setNewOrderTitle(e.target.value)}} 
             type='text'
-            placeholder='Enter item name...'
+            placeholder='Enter title...'
             value={props.newOrderTitle ?? ''}
           />
         </div>
@@ -176,7 +184,7 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
       </div>
       <div>
         <div>
-          Add Order Item
+          Available Items
         </div>
         <div>
           <select
@@ -194,9 +202,10 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
             })}
           </select>
         </div>
+        
         <div style={{marginTop: '8px'}}>
-          <button style={{width: '100%'}} className='primary' onClick={handleAddOrderItem}>
-            Add
+          <button style={{width: '100%'}} className='button-link' onClick={handleAddOrderItem}>
+            Add Selected Item
           </button>
         </div>
       </div>
@@ -233,19 +242,18 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
     <hr/>
     <div>
       <button 
-        className='primary'
+        className='button-link'
         onClick={props.onConfirm}
-        style={{width: '50%'}}
 
       >
         Add Order
       </button>
-      <button onClick={props.onClear} className='primary'>
+      <button onClick={props.onClear} className='button-link collapse'>
         Clear Order
       </button>
       <button 
-        style={{float: 'right'}}
-        className='danger'
+        
+        className='button-link destructive'
         onClick={props.onCancel}
       >
         Cancel

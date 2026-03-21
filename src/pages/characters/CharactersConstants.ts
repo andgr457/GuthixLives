@@ -1,7 +1,6 @@
 import type { GEItemGameVersion } from '../../types/Characters'
 
 export const CharacterStorageKeys = {
-  Defaults: 'defaults',
   Characters: 'characters',
   CharactersGPTransactions: 'characters-gp-transactions',
   CharactersGEItems: 'characters-ge-items',

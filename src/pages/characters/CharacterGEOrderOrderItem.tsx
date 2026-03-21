@@ -1,6 +1,5 @@
 import type React from 'react'
 import type { CharacterGEItem, CharacterGEOrderItem } from '../../types/Characters'
-import { DateTime } from 'luxon'
 
 interface CharacterGEOrderItemProps {
   orderItem: CharacterGEOrderItem
@@ -16,34 +15,15 @@ interface CharacterGEOrderItemProps {
 export default function CharacterGEOrderOrderItem(props: CharacterGEOrderItemProps) {
 
   return <div style={{gap: '8px'}} onClick={() => {}}>
-    <div className='list-item-title flex-wrap-gap' style={{gap: '12px'}}>
+    <div className='list-item-title second flex-wrap-gap' style={{gap: '12px'}}>
         <div onClick={() => {props.setOrderItemShowListDetail(props.orderItem.id, !props.orderItem.showListDetail)}}>
-          {props.orderItem.showListDetail === true ? '-' : '+'} {props.relatedGEItem.name}
-        </div>
-        <div className='list-item-title-sub flex-wrap-gap' style={{gap: '25px'}}>
-          <div title='Bought Amount'>
-            BA {props.orderItem.boughtAmount.toLocaleString()}
-          </div>
-          <div title='Bought Price'>
-            BP {props.orderItem.boughtPrice.toLocaleString()} <span style={{fontSize: '0.75em'}}>GP</span>
-          </div>
-          <div title='Sell Amount'>
-            SA {props.orderItem.sellAmount.toLocaleString()}
-          </div>
-          <div title='Sell Price'>
-            SP {props.orderItem.sellPrice.toLocaleString()}
-          </div>
-          {props.orderItem.taxed === true && <div>
-            2% Tax  
-          </div>} 
+          <button className='button-link collapse'>
+            {props.orderItem.showListDetail === true ? '-' : '+'} {props.relatedGEItem.name}
+          </button>
         </div>
     </div>
 
-    {props.orderItem.showListDetail === true && <div>
-      <div className='list-item-body' style={{fontSize: '0.9em', textAlign: 'center'}}>
-        GE - {props.relatedGEItem.price?.toLocaleString()} GP 
-        as of {DateTime.fromISO(props.relatedGEItem.geTimestamp as string).toLocal().toLocaleString(DateTime.DATETIME_FULL)}
-      </div>
+    {props.orderItem.showListDetail === true && <div className='list-item-body'>
       <div className='list-item-body flex-wrap-gap' style={{gap: '8px'}}>
         <div>
           <div>

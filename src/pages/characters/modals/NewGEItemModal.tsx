@@ -1,6 +1,7 @@
 import Modal from '../../core/Modal'
 import AppErrorSection from '../../core/AppErrorSection'
 import { useKeyPress } from '../../../hooks/useKeyPress'
+import { useEffect, useRef } from 'react'
 
 interface NewGEItemModalProps {
   showNewGEItemModal: boolean
@@ -14,6 +15,8 @@ interface NewGEItemModalProps {
 }
 
 export default function NewGEItemModal(props: NewGEItemModalProps){
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const {
     error,
     newItemName,
@@ -30,6 +33,11 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
 
   useKeyPress('Enter', handleEnterPress);
 
+  useEffect(() => {
+    if (showHistoryModal) {
+      inputRef.current?.focus();
+    }
+  }, [showHistoryModal]);
 
   return <Modal
     isOpen={showHistoryModal}
@@ -44,6 +52,7 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
         </div>
         <div>
           <input 
+            ref={inputRef}
             style={{width: '33vh'}}
             onChange={(e) => {props.setNewItemName(e.target.value)}} 
             type='text'
@@ -79,16 +88,13 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
     <hr/>
     <div>
       <button 
-        className='primary'
+        className='button-link'
         onClick={props.onConfirm}
-        style={{width: '50%'}}
-
       >
         Add Item
       </button>
       <button 
-        style={{float: 'right'}}
-        className='danger'
+        className='button-link destructive'
         onClick={props.onCancel}
       >
         Cancel
@@ -96,9 +102,6 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
     </div>
     <div>
       <AppErrorSection error={error} />
-    </div>
-    <div>
-      
     </div>
   </Modal>
 }

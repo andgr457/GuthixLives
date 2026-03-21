@@ -41,7 +41,6 @@ export default function CharacterGEItems() {
   const [newItemGameVersion, setNewItemGameVersion] = useState('rs')
   const [search, setSearch] = useState('')
   const [searchGame, setSearchGame] = useState('both')
-  const [showDanger, setShowDanger] = useState(false)
   const [sortOrder, setSortOrder] = useState<'' | 'asc' | 'desc'>('')
   const [sortField, setSortField] = useState('')
   
@@ -73,7 +72,8 @@ export default function CharacterGEItems() {
         name: itemName,
         characterId: characterId as string,
         geTimestamp: DateTime.utc().toISO(),
-        gameVersion: newItemGameVersion as GEItemGameVersion
+        gameVersion: newItemGameVersion as GEItemGameVersion,
+        showItemDetail: false
       }
   
       const geResponse = await fetchGEItem(newItem?.name as string, newItem.gameVersion)
@@ -93,7 +93,8 @@ export default function CharacterGEItems() {
         characterId: newItem.characterId,
         gameVersion: newItem.gameVersion,
         price: newItem.price,
-        volume: newItem.volume
+        volume: newItem.volume,
+        showItemDetail: newItem.showItemDetail
       }
       newHistoryItems.push(historyItem)
 
@@ -113,6 +114,17 @@ export default function CharacterGEItems() {
       setNewItemModalError(`${JSON.stringify(error)}`)
     }
   }, [newItemName, newItemGameVersion, geItems])
+
+  const handleSetShowItemDetail = useCallback((itemId: string, value: boolean) => {
+    const newItems = []
+    for(const item of geItems){
+      if(item.id === itemId){
+        item.showItemDetail = value
+      }
+      newItems.push(item)
+    }
+    setGEItems(newItems)
+  }, [geItems])
 
   const handleItemRefresh = useCallback(async (itemId: string) => {
     const item = geItems?.find(i => i.id === itemId)
@@ -153,52 +165,6 @@ export default function CharacterGEItems() {
     }
 
     setGEItems(newItems)
-  }, [geItems, geItemHistory])
-
-  const handleDeleteItemById = useCallback((itemId: string) => {
-    if(!itemId) return
-    if(!confirm('Are you sure you want to entirely remove the item (along with all of its history)?')) return
-
-    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
-    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
-    const historyIds = relatedHistoryItems.map(h => h.id)
-
-    if(relatedHistoryItems?.length > 0){
-      const newHistory = []
-      for(const historyItem of geItemHistory){
-        if(!historyIds.includes(historyItem.id)){
-          newHistory.push(historyItem)
-        }
-      }
-      setGEItemHistory(newHistory)
-    }
-    const newItems = []
-    for(const item of geItems){
-      if(item.id !== relatedItem?.id){
-        newItems.push(item)
-      }
-    }
-    setGEItems(newItems)
-  }, [geItems, geItemHistory])
-
-  
-  const handleClearItemHistoryByItemId = useCallback((itemId: string) => {
-    if(!itemId) return
-    if(!confirm('Are you sure you want to reset the history for this item?')) return
-    
-    const relatedItem = geItems.find(i => i.id === itemId && i.characterId === characterId)
-    const relatedHistoryItems = geItemHistory.filter(h => h.itemId === itemId && relatedItem?.characterId === characterId)
-    const historyIds = relatedHistoryItems.map(h => h.id)
-
-    if(relatedHistoryItems?.length > 0){
-      const newHistory = []
-      for(const historyItem of geItemHistory){
-        if(!historyIds.includes(historyItem.id)){
-          newHistory.push(historyItem)
-        }
-      }
-      setGEItemHistory(newHistory)
-    }
   }, [geItems, geItemHistory])
 
   return <div className='characters-app'>
@@ -261,12 +227,9 @@ export default function CharacterGEItems() {
         <div>
           Actions
         </div>
-        <div className='flex-wrap-gap' style={{gap: '8px'}}>
-          <button className='primary' onClick={() => {setShowNewItemModal(true)}}>
+        <div>
+          <button className='button-link action' onClick={() => {setShowNewItemModal(true)}}>
             New Item
-          </button>
-          <button className='danger' onClick={() => {setShowDanger(!showDanger)}}>
-            {showDanger ? 'Hide' : 'Show'} Danger Zones
           </button>
         </div>
       </div>
@@ -277,19 +240,19 @@ export default function CharacterGEItems() {
         </div>
         <button 
           onClick={() => {setSearchGame('both')}} 
-          className={searchGame === 'both' ? 'primary selected' : 'primary'}
+          className={searchGame === 'both' ? 'button-link action selected' : 'button-link action'}
         >
           Both
         </button>
         <button 
           onClick={() => {setSearchGame('rs')}} 
-          className={searchGame === 'rs' ? 'primary selected' : 'primary'}
+          className={searchGame === 'rs' ? 'button-link action selected' : 'button-link action'}
         >
           RuneScape 3
         </button>
         <button 
           onClick={() => {setSearchGame('osrs')}} 
-          className={searchGame === 'osrs' ? 'primary selected' : 'primary'}
+          className={searchGame === 'osrs' ? 'button-link action selected' : 'button-link action'}
         >
           OSRS
         </button>
@@ -301,26 +264,26 @@ export default function CharacterGEItems() {
         <div>
           <button 
             onClick={() => {setSortField(sortField === 'name' ? '' : 'name')}} 
-            className={sortField === 'name' ? 'primary selected' : 'primary'}
+            className={sortField === 'name' ? 'button-link action selected' : 'button-link action'}
           >
             Name
           </button>
           <button 
             onClick={() => {setSortField(sortField === 'price' ? '' : 'price')}} 
-            className={sortField === 'price' ? 'primary selected' : 'primary'}
+            className={sortField === 'price' ? 'button-link action selected' : 'button-link action'}
           >
             Price
           </button>
            - 
           <button 
             onClick={() => {setSortOrder(sortOrder === 'asc' ? '' : 'asc')}} 
-            className={sortOrder === 'asc' ? 'primary selected' : 'primary'}
+            className={sortOrder === 'asc' ? 'button-link action selected' : 'button-link action'}
           >
             ASC
           </button>
           <button 
             onClick={() => {setSortOrder(sortOrder === 'desc' ? '' : 'desc')}} 
-            className={sortOrder === 'desc' ? 'primary selected' : 'primary'}
+            className={sortOrder === 'desc' ? 'button-link action selected' : 'button-link action'}
           >
             DESC
           </button>
@@ -375,9 +338,14 @@ export default function CharacterGEItems() {
           }
         }
         return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '15px'}}>
+          <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}}>
             <div>
-              {item.name}
+              <button 
+                className='button-link collapse'
+                onClick={() => {handleSetShowItemDetail(item.id as string, !(item.showItemDetail ?? false))}}
+              >
+                {item.showItemDetail === true ? '-' : '+'} {item.name}
+              </button>
             </div>
             <div>
               <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
@@ -395,7 +363,7 @@ export default function CharacterGEItems() {
             </div>
           </div>
 
-          <div className='list-item-body'>
+          {item.showItemDetail === true && <div className='list-item-body'>
             <div style={{textAlign: 'center'}}>
                 {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
             </div>
@@ -440,15 +408,7 @@ export default function CharacterGEItems() {
                 }
               ]} />
             </div>
-            {showDanger && <div className='danger-zone'>
-              <button onClick={() => {handleDeleteItemById(item.id as string)}} className='danger'>
-                <strong>DELETE</strong> {item.name}
-              </button>
-              <button onClick={() => {handleClearItemHistoryByItemId(item.id as string)}} className='danger'>
-                <strong>RESET</strong> History
-              </button>
-            </div>}
-          </div>
+          </div>}
 
         </div>
       })}
