@@ -83,6 +83,7 @@ export default function CharacterGEOrderPlanner() {
     for(const orderItem of geOrderItems){
       newOrderItems.push(orderItem)
     }
+    
     newOrderItems.push({
       id: `oi_${foundItem.name}_${DateTime.utc().toMillis()}`,
       itemId: foundItem.id as string,
@@ -638,12 +639,12 @@ export default function CharacterGEOrderPlanner() {
           let sellPrice = oi.sellPrice * oi.sellAmount
           if(oi.taxed === true){
             const taxAmount = sellPrice * .02
-            sellPrice = oi.sellPrice - taxAmount
+            sellPrice = sellPrice - taxAmount
             totalTax += taxAmount
           }
           totalBought += oi.boughtPrice * oi.boughtAmount
           totalSell += sellPrice
-          totalGains += sellPrice - oi.boughtPrice
+          totalGains += sellPrice - (oi.boughtPrice * oi.boughtAmount)
         })
 
         return <CharacterGEOrderView 

@@ -118,6 +118,10 @@ export default function CharacterGEOrderOrderItem(props: CharacterGEOrderItemPro
         </div>
       </div>
 
+      <div>
+
+      </div>
+
       <div className='list-item-body flex-wrap-gap' style={{gap: '8px'}}>
         <div>
           {props.children}

@@ -9,7 +9,6 @@ import InfoSection from '../core/InfoSection';
 
 export default function Dashboard() {
   useScrollReveal()
-  
   const showConfirm = useConfirm()
   const [characters, setCharacters] = useLocalStorage<Character[]>(
     CharacterStorageKeys.Characters,
@@ -39,6 +38,11 @@ export default function Dashboard() {
   const [showFilters, setShowFilters] = useState(false)
   const [filterByCharacterId, setFilterByCharacterId] = useState('')
   const [filterByGameVersion, setFilterByGameVersion] = useState('')
+  
+  const clearFilters = () => {
+    setFilterByCharacterId('')
+    setFilterByGameVersion('')
+  }
 
   let totalBought = 0
   let totalBoughtAmount = 0
@@ -48,17 +52,30 @@ export default function Dashboard() {
   let totalTax = 0
 
   geOrderItems.forEach((oi) => {
+    if(filterByCharacterId){
+      const relatedOrder = geOrders.find(o => o.id === oi.orderId)
+      if(relatedOrder?.characterId !== filterByCharacterId){
+        return
+      }
+    }
+    if(filterByGameVersion){
+      const relatedItem = geItems.find(i => i.id === oi.itemId)
+      if(relatedItem?.gameVersion !== filterByGameVersion){
+        return
+      }
+    }
+
     let sellPrice = oi.sellPrice * oi.sellAmount
     if(oi.taxed === true){
       const taxAmount = sellPrice * .02
-      sellPrice = oi.sellPrice - taxAmount
+      sellPrice = sellPrice - taxAmount
       totalTax += taxAmount
     }
     totalBought += oi.boughtPrice * oi.boughtAmount
     totalBoughtAmount += oi.boughtAmount
     totalSell += sellPrice
     totalSellAmount += oi.sellAmount
-    totalGains += sellPrice - oi.boughtPrice
+    totalGains += sellPrice - (oi.boughtPrice * oi.boughtAmount)
   })
 
   return <div className='dashboard-app reveal'>
@@ -83,27 +100,44 @@ export default function Dashboard() {
       </div>
       {showFilters === true && <div className='list-item-body'>
         <InfoSection 
-        sectionTitle='Filtering By'
-        items={[
-          {
-            title: 'Character',
-            value: filterByCharacterId ? 'Yes' : 'No'
-          }
-        ]}
-      />
-        <div style={{fontSize: 'smaller', width: '50%'}}>
-          <select
-            className='rs-select'
-            style={{width: '100%'}}
-            onChange={(e) => {setFilterByCharacterId(e.currentTarget.value)}}
-          >
-            <option value=''>Filter Character</option>
-            {characters?.map(c => {
-              return <option value={c.id}>
-                {c.name}
-              </option>
-            })}
-          </select>
+          sectionTitle='Filtering By'
+          items={[
+            {
+              title: 'Character',
+              value: filterByCharacterId ? characters.find(c => c.id === filterByCharacterId)?.name as string : 'No'
+            },
+            {
+              title: 'Game Version',
+              value: filterByGameVersion ? filterByGameVersion.toUpperCase() : 'NO'
+            }
+          ]}
+        />
+        <div className='flex-wrap-gap'>
+          <div>
+            <select
+              className='rs-select'
+              value={filterByCharacterId}
+              onChange={(e) => {setFilterByCharacterId(e.currentTarget.value)}}
+            >
+              <option value=''>Filter Character</option>
+              {characters?.map(c => {
+                return <option value={c.id}>
+                  {c.name}
+                </option>
+              })}
+            </select>
+          </div>
+          <div>
+            <select
+              className='rs-select'
+              value={filterByGameVersion}
+              onChange={(e) => {setFilterByGameVersion(e.currentTarget.value)}}
+            >
+              <option value=''>Filter Game</option>
+              <option value='osrs'>OSRS</option>
+              <option value='rs'>RS 3</option>
+            </select>
+          </div>
         </div>
       </div>}
     </div>
@@ -129,19 +163,27 @@ export default function Dashboard() {
         },
         {
           title: 'Bought Amount',
-          value: `${totalBought}`
+          value: `${totalBoughtAmount.toLocaleString()}`
         },
         {
           title: 'Bought Price',
-          value: `${totalBought}`
+          value: `${totalBought.toLocaleString()} GP`
         },
         {
           title: 'Sell Amount',
-          value: `${totalSellAmount}`
+          value: `${totalSellAmount.toLocaleString()}`
         },
         {
           title: 'Sell Price',
-          value: `${totalSell}`
+          value: `${totalSell.toLocaleString()} GP`
+        },
+        {
+          title: 'Tax',
+          value: `${totalTax.toLocaleString()} GP`
+        },
+        {
+          title: 'Gains',
+          value: `${totalGains.toLocaleString()} GP`
         }
 
       ]}
