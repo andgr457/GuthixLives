@@ -72,7 +72,7 @@ export default function CharacterGEItems() {
     try {
       const newItems = []
       const newItem: CharacterGEItem = {
-        id: itemName,
+        id: `${itemName}_${newItemGameVersion}_${characterId}`,
         name: itemName,
         characterId: characterId as string,
         geTimestamp: DateTime.utc().toISO(),
@@ -355,13 +355,13 @@ export default function CharacterGEItems() {
               <button title='Determines where to refresh data from.' className='button-link destructive'>
                 {getShortGameNameByVersion(item.gameVersion as CharacterGEItemGameVersion)}
               </button>
-            </div>
-            <div>
-              <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
+              <button title='Determines where to refresh data from.' className='button-link destructive'>
+                {item.price?.toLocaleString() ?? 0} GP
+              </button>
+              <button 
+                onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
                 Refresh
               </button>
-            </div>
-            <div>
               <button onClick={() => {
                   setHistoryModalItems(historyItems);
                   setShowHistoryModal(true)
