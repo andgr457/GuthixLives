@@ -1,22 +1,20 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { CharacterStorageKeys } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
 import useScrollReveal from '../../hooks/useScrollReveal'
 import NewGEItemModal from './modals/NewGEItemModal'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, GEItemGameVersion } from '../../types/Characters'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, CharacterGEOrderStatus, CharacterGEItemGameVersion, QuickOrderItem } from '../../types/Characters'
 import CharacterLinks from './CharacterLinks'
 import NewGEOrderModal from './modals/NewGEOrderModal'
-import CharacterGEOrderOrderItem from './CharacterGEOrderOrderItem'
-import InfoSection from '../core/InfoSection'
 import '../../styles/Parchment.css'
 import { useConfirm } from '../../context/ConfirmProvider'
+import CharacterGEOrderView from './CharacterGEOrderView'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
-  const navigate = useNavigate()
   const showConfirm = useConfirm()
 
   const {characterId} = useParams<{ characterId: string }>();
@@ -57,13 +55,47 @@ export default function CharacterGEOrderPlanner() {
   const [searchOrders, setSearchOrders] = useState('')
   const [searchOrderItems, setSearchOrderItems] = useState('')
 
-  const [filterStatus, setFiltertatus] = useState('both')
   const [showDanger, setShowDanger] = useState(false)
-  const [sortOrder, setSortOrder] = useState<'' | 'asc' | 'desc'>('')
-  const [sortField, setSortField] = useState('')
+  const [showComplete, setShowComplete] = useState(false)
   
   const [showNewItemModal, setShowNewItemModal] = useState(false)
   const [newItemModalError, setNewItemModalError] = useState('')
+
+  const [selectedQuickOrderItem, setSelectedQuickOrderItem] = useState<QuickOrderItem>({} as any)
+
+  const handleAddOrderQuickOrderItem = useCallback(async () => {
+    if(!selectedQuickOrderItem?.itemId){
+      return
+    }
+
+    const foundItem = geItems
+    .find(i => 
+      i.characterId === characterId 
+      && i.id === selectedQuickOrderItem.itemId
+    )
+
+    if(!foundItem){
+      return
+    }
+    
+    const newOrderItems: CharacterGEOrderItem[] = []
+    for(const orderItem of geOrderItems){
+      newOrderItems.push(orderItem)
+    }
+    newOrderItems.push({
+      id: `oi_${foundItem.name}_${DateTime.utc().toMillis()}`,
+      itemId: foundItem.id as string,
+      orderId: selectedQuickOrderItem.orderId, //set later
+      taxed: true,
+      boughtAmount: 0,
+      boughtPrice: 0,
+      sellAmount: 0,
+      sellPrice: 0,
+      showListDetail: true,
+      status: 'Pending'
+    })
+    setGEOrderItems(newOrderItems)
+  }, [geItems, geOrderItems, selectedQuickOrderItem])
 
   const handleAddOrderClicked = useCallback(() => {
     if(!newOrderOrderItems || newOrderOrderItems.length === 0){
@@ -87,6 +119,7 @@ export default function CharacterGEOrderPlanner() {
       showListDetail: true,
       showListOrderItems: false,
       editNotes: false,
+      showNotes: !newOrderNotes ? false : true
     }
 
     const newOrderItems = []
@@ -150,7 +183,7 @@ export default function CharacterGEOrderPlanner() {
         name: itemName,
         characterId: characterId as string,
         geTimestamp: DateTime.utc().toISO(),
-        gameVersion: newItemGameVersion as GEItemGameVersion,
+        gameVersion: newItemGameVersion as CharacterGEItemGameVersion,
         showItemDetail: false
       }
   
@@ -193,12 +226,15 @@ export default function CharacterGEOrderPlanner() {
     }
   }, [newItemName, newItemGameVersion, geItems])
 
-  const handleClearNewOrder = () => {
+  const handleClearNewOrder = useCallback(async () => {
+    if(!await showConfirm('Clear draft order information?', 'New Order Clear')){
+      return
+    }
     setNewOrderModalError('')
     setNewOrderNotes('')
     setNewOrderOrderItems([])
     setNewOrderTitle('')
-  }
+  }, [])
 
   const handleDeleteOrderById = useCallback(async (orderId: string) => {
     const ok = await showConfirm(
@@ -236,16 +272,6 @@ export default function CharacterGEOrderPlanner() {
         orderOrderItemCount += 1
       }
     }
-    let deleteOrderToo = false
-    if(orderOrderItemCount === 1){
-      const ok = await showConfirm(
-        'There will be no more order items for this order. Delete the order too?',
-        'Delete Order & Order Items!'
-      )
-      if(ok === true){
-        deleteOrderToo = true
-      }
-    }
 
     const newOrderItems = []
     for(const orderItem of geOrderItems){
@@ -255,15 +281,21 @@ export default function CharacterGEOrderPlanner() {
     }
     setGEOrderItems(newOrderItems)
 
-    if(deleteOrderToo === true){
-      const newOrders = []
-      for(const order of geOrders){
-        if(order.id !== orderId){
-          newOrders.push(order)
-        }
+    if(orderOrderItemCount === 1){
+      if(!await showConfirm(
+        'There are no more order items for this order. Delete the order too?',
+        'Delete Order & Order Items!'
+      )) {
+        return
       }
-      setGEOrders(newOrders)
     }
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id !== orderId){
+        newOrders.push(order)
+      }
+    }
+    setGEOrders(newOrders)
   }, [geOrderItems, geOrders])
 
   const handleSetOrderNotes = useCallback((orderId: string, value: string) => {
@@ -282,6 +314,17 @@ export default function CharacterGEOrderPlanner() {
     for(const order of geOrders){
       if(order.id === orderId){
         order.editNotes = value
+      }
+      newOrders.push(order)
+    }
+    setGEOrders(newOrders)
+  }, [geOrders])
+
+  const handleToggleShowOrderNotes = useCallback((orderId: string, value: boolean) => {
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.showNotes = value
       }
       newOrders.push(order)
     }
@@ -392,6 +435,26 @@ export default function CharacterGEOrderPlanner() {
     setGEOrderItems(newOrderItems)
   }, [geOrderItems])
 
+  const handleSetOrderStatus = useCallback(async (orderId: string, status: CharacterGEOrderStatus) => {
+    if(status === 'Complete'){
+      if(!await showConfirm('Are you sure you want to complete this order?')){
+        return
+      }
+    }
+
+    const newOrders = []
+    for(const order of geOrders){
+      if(order.id === orderId){
+        order.status = status
+        if(status === 'Complete'){
+          order.completedDate = DateTime.utc().toISO()
+        }
+      }
+      newOrders.push(order)
+    }
+    setGEOrders(newOrders)
+  }, [geOrders])
+
   return <div className='characters-app'>
     <div id='top'></div>
     <NewGEOrderModal 
@@ -404,7 +467,7 @@ export default function CharacterGEOrderPlanner() {
       setNewOrderOrderItems={setNewOrderOrderItems}
       setNewOrderTitle={setNewOrderTitle}
       showNewOrderModal={showNewOrderModal}
-      onClear={() => {
+      onClear={ () => {
         handleClearNewOrder()
       }}
       onCancel={() => {
@@ -442,7 +505,25 @@ export default function CharacterGEOrderPlanner() {
     </div>
     
     <div className='flex-wrap-gap' style={{gap: '10px'}}>
-      
+      <div>
+        <div>
+          Actions
+        </div>
+        <div className='flex-wrap-gap' style={{gap: '8px'}}>
+           <button className='button-link action do' onClick={() => {setShowNewOrderModal(true)}}>
+            New Order
+          </button>
+          <button className='button-link action do' onClick={() => {setShowNewItemModal(true)}}>
+            New Item
+          </button>
+          <button className='button-link action' onClick={() => {setShowComplete(!showComplete)}}>
+            {showComplete === true ? 'Hide' : 'Show'} Complete
+          </button>
+          <button className='button-link action danger' onClick={() => {setShowDanger(!showDanger)}}>
+            {showDanger ? 'Hide' : 'Show'} Danger Zones
+          </button>
+        </div>
+      </div>
       <div>
         <div>
           Search Orders
@@ -479,73 +560,7 @@ export default function CharacterGEOrderPlanner() {
           />
         </div>
       </div>
-      <div>
-        <div>
-          Actions
-        </div>
-        <div className='flex-wrap-gap' style={{gap: '8px'}}>
-           <button className='button-link action do' onClick={() => {setShowNewOrderModal(true)}}>
-            New Order
-          </button>
-          <button className='button-link action do' onClick={() => {setShowNewItemModal(true)}}>
-            New Item
-          </button>
-          <button className='button-link action danger' onClick={() => {setShowDanger(!showDanger)}}>
-            {showDanger ? 'Hide' : 'Show'} Danger Zones
-          </button>
-        </div>
-      </div>
-
-      <div>
-        
-        <div>
-          Filter Status
-        </div>
-        <button 
-          onClick={() => {setFiltertatus('both')}} 
-          className={filterStatus === 'both' ? 'button-link action selected' : 'button-link action'}
-        >
-          Both
-        </button>
-        <button 
-          onClick={() => {setFiltertatus('pending')}} 
-          className={filterStatus === 'pending' ? 'button-link action selected' : 'button-link action'}
-        >
-          Pending
-        </button>
-        <button 
-          onClick={() => {setFiltertatus('complete')}} 
-          className={filterStatus === 'complete' ? 'button-link action selected' : 'button-link action'}
-        >
-          Complete
-        </button>
-      </div>
-      <div>
-        <div>
-          Sort by
-        </div>
-        <div>
-          <button 
-            onClick={() => {setSortField(sortField === 'name' ? '' : 'name')}} 
-            className={sortField === 'name' ? 'button-link action selected' : 'button-link action'}
-          >
-            Name
-          </button>
-           - 
-          <button 
-            onClick={() => {setSortOrder(sortOrder === 'asc' ? '' : 'asc')}} 
-            className={sortOrder === 'asc' ? 'button-link action selected' : 'button-link action'}
-          >
-            ASC
-          </button>
-          <button 
-            onClick={() => {setSortOrder(sortOrder === 'desc' ? '' : 'desc')}} 
-            className={sortOrder === 'desc' ? 'button-link action selected' : 'button-link action'}
-          >
-            DESC
-          </button>
-        </div>
-      </div>
+      
     </div>
 
     <div style={{padding: '1em'}}>
@@ -553,24 +568,9 @@ export default function CharacterGEOrderPlanner() {
         style={{textAlign: 'center'}}
       >There seems to be nothing here. Click "New Order". 
       </div>}
-      {geOrders?.filter(o => o.characterId === characterId).sort((a, b) => {
-        if (sortOrder === "asc") {
-          if (sortField === "name") {
-            return (a.title ?? "").localeCompare(b.title ?? "");
-          }
-        }
-
-        if (sortOrder === "desc") {
-          if (sortField === "title") {
-            return (b.title ?? "").localeCompare(a.title ?? "");
-          }
-        }
-
-        return 0;
-      }).map((order, index) => {
+      {geOrders?.filter(o => o.characterId === characterId).map((order, index) => {
         const relatedOrderItems = geOrderItems.filter(oi => oi.orderId === order.id)
-        const relatedOrderItemItemIds = relatedOrderItems.map(roi => roi.itemId)
-        const relatedGEItems = geItems.filter(i => i.characterId === characterId && relatedOrderItemItemIds.includes(i.id as string))
+        const relatedGEItems = geItems.filter(i => i.characterId === characterId)
         
         let filteredOut = false
         let found = false
@@ -584,7 +584,6 @@ export default function CharacterGEOrderPlanner() {
           }
         }
         if(searchOrderItems){
-          const relatedOrderItems = geOrderItems.filter(oi => oi.orderId === order.id)
           for(const oi of relatedOrderItems){
             const relatedGEItem = relatedGEItems.find(i => i.id === oi.itemId)
             if(relatedGEItem?.name?.toLowerCase().includes(searchOrderItems.toLowerCase())){
@@ -612,14 +611,11 @@ export default function CharacterGEOrderPlanner() {
             filteredOut = true
           }
         }
-        
-        if(filterStatus !== 'both'){
-          if(filterStatus === 'pending' && order.status !== 'Pending'){
-            filteredOut = true
-          } else if(filterStatus === 'complete' && order.status !== 'Complete'){
-            filteredOut = true
-          }
+
+        if(order.status === 'Complete' && showComplete === false){
+          filteredOut = true
         }
+
         const createdDate = DateTime.fromISO(order.createdDate).toLocal().toFormat('dd-MM-yy')
         let completedDate 
         if(order.completedDate){
@@ -643,140 +639,37 @@ export default function CharacterGEOrderPlanner() {
           totalGains += sellPrice - oi.boughtPrice
         })
 
-        return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}`} key={`${order.id}__${index}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}}>
-            <div>
-              <button 
-                onClick={() => {handleToggleShowOrderListDetail(order.id, !order.showListDetail)}} 
-                className='button-link collapse'
-              >
-                {order.showListDetail === true ? '-' : '+'} {order.title}
-              </button>
-            </div>
-            <div>
-              <button  onClick={() => {navigate(`characters/${characterId}/ge-orders/${order.id}`)}} className='button-link'>
-                View
-              </button>
-            </div>
-          </div>
-          {order.showListDetail === true && <div className='list-item-body'>
-            <div className='flex-wrap-gap'>
-              <InfoSection 
-                sectionTitle='Details'
-                items={[
-                  {
-                    title: 'Status',
-                    value: order.status
-                  },
-                  {
-                    title: 'Created',
-                    value: createdDate
-                  },
-                  {
-                    title: 'Completed',
-                    value: completedDate ?? 'N/A'
-                  }
-                ]}
-              />
-              <InfoSection 
-                sectionTitle='Totals'
-                items={[
-                  {
-                    title: 'Bought',
-                    value: `${totalBought.toLocaleString()} GP`
-                  },
-                  {
-                    title: 'Sell',
-                    value: `${totalSell.toLocaleString()} GP`
-                  },
-                  {
-                    title: 'Tax',
-                    value: `${totalTax.toLocaleString()} GP`
-                  },
-                  {
-                    title: 'Gains',
-                    value: `${totalGains.toLocaleString()} GP`
-                  }
-                ]}
-              />
-            </div>
-            <div style={{padding: '1em'}}>
-              <div className='list-item-title second' style={{fontSize: '1em'}}>
-                Notes {!order.editNotes ? <button onClick={() => {handleToggleOrderEditNotes(order.id as string, !(order.editNotes ?? false))}} className='button-link collapse'>
-                  Edit
-                </button> : null}
-              </div>
-              {order.editNotes === true && <textarea 
-                onFocus={(e) => {
-                  e.currentTarget.style.height = ''
-                }}
-                onChange={(e) => {handleSetOrderNotes(order.id as string, e.currentTarget.value)}}
-                onBlur={(e) => {
-                  e.currentTarget.style.height = ''
-                  handleToggleOrderEditNotes(order.id as string, false)
-                }} 
-                style={{width: '100%'}} 
-                rows={2} 
-                cols={50}
-                placeholder='Enter notes...'
-              >
-                {order.notes ?? ''}
-              </textarea>}
-              {!order.editNotes && order.notes && <div 
-                className='parchment'
-              >
-                {order.notes ?? ''}  
-              </div>}
-              <div>
-                {showDanger && <br/>}
-                {showDanger && <div className='danger-zone'>
-                    <button 
-                      className='button-link action danger'
-                      onClick={() => {handleDeleteOrderById(order.id as string)}} 
-                      >
-                      Delete Order
-                    </button>
-                  </div>}
-              </div>
-            </div>
-            <div style={{padding: '1em'}}>
-              <div 
-                onClick={() => {handleToggleShowOrderListOrderItems(order.id as string, !order.showListOrderItems)}} 
-                className='list-item-title second' 
-              >
-                <button className='button-link collapse'>
-                  {order.showListOrderItems ? '-' : '+'} {relatedOrderItems.length} Order Item(s)
-                </button>
-              </div>
-              {order.showListOrderItems && <div className='list-item-body'>
-                {relatedOrderItems.map(orderItem => {
-                  const relatedItem = relatedGEItems.find(i => i.id === orderItem.itemId) as CharacterGEItem
-                  return <div style={{fontSize: '1.2em', marginLeft: '.2em', marginRight: '.2em'}}>
-                    <CharacterGEOrderOrderItem 
-                      orderItem={orderItem}
-                      relatedGEItem={relatedItem as CharacterGEItem}
-                      setOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}
-                      setOrderItemBoughtPrice={handleSetOrderItemBoughtPrice}
-                      setOrderItemIsTaxed={handleSetOrderItemIsTaxed}
-                      setOrderItemSellAmount={handleSetOrderItemSellAmount}
-                      setOrderItemSellPrice={handleSetOrderItemSellPrice}
-                      setOrderItemShowListDetail={handleToggleShowOrderItemListDetail}
-                    >
-                      {showDanger && <div className='danger-zone'>
-                        <button 
-                          onClick={() => {handleDeleteOrderItemById(orderItem.id as string, order.id as string)}} 
-                          className='button-link action danger'
-                        >
-                          Delete Order Item
-                        </button>
-                      </div>}
-                    </CharacterGEOrderOrderItem>
-                  </div>
-                })}
-              </div>}
-            </div>
-          </div>}
-        </div>
+        return <CharacterGEOrderView 
+          handleSetOrderStatus={handleSetOrderStatus}
+          handleAddOrderQuickOrderItem={handleAddOrderQuickOrderItem}
+          handleDeleteOrderById={handleDeleteOrderById}
+          handleDeleteOrderItemById={handleDeleteOrderItemById}
+          handleSetOrderItemBoughtPrice={handleSetOrderItemBoughtPrice}
+          handleSetOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}  
+          handleSetOrderItemIsTaxed={handleSetOrderItemIsTaxed}
+          handleSetOrderItemSellAmount={handleSetOrderItemSellAmount}
+          handleSetOrderItemSellPrice={handleSetOrderItemSellPrice}
+          handleSetOrderNotes={handleSetOrderNotes}
+          handleToggleOrderEditNotes={handleToggleOrderEditNotes}
+          handleToggleShowOrderItemListDetail={handleToggleShowOrderItemListDetail}
+          handleToggleShowOrderListDetail={handleToggleShowOrderListDetail}
+          handleToggleShowOrderListOrderItems={handleToggleShowOrderListOrderItems}
+          handleToggleShowOrderNotes={handleToggleShowOrderNotes}
+          setSelectedQuickOrderItem={setSelectedQuickOrderItem}
+          totalBought={totalBought}
+          totalGains={totalGains}
+          totalSell={totalSell}
+          totalTax={totalTax}
+          index={`${index}`}
+          completedDate={completedDate as string}
+          createdDate={createdDate}
+          filteredOut={filteredOut}
+          order={order}
+          relatedGEItems={relatedGEItems}
+          relatedOrderItems={relatedOrderItems}
+          showDanger={showDanger}
+
+        />
       })}
     </div>
   </div>

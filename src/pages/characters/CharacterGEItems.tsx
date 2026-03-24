@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { useParams } from 'react-router-dom'
-import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, GEItemGameVersion } from '../../types/Characters'
-import { CharacterStorageKeys, getGameNameByVersion } from './CharactersConstants'
+import type { Character, CharacterGEItem, CharacterGEItemHistory, CharacterGEOrder, CharacterGEOrderItem, CharacterGEItemGameVersion } from '../../types/Characters'
+import { CharacterStorageKeys, getGameNameByVersion, getShortGameNameByVersion } from './CharactersConstants'
 import { fetchGEItem } from '../../services/ge/GE.service'
 import { DateTime } from 'luxon'
 import InfoSection from '../core/InfoSection'
@@ -60,7 +60,11 @@ export default function CharacterGEItems() {
 
     const trimmed = newItemName.trim()
     const itemName = trimmed[0].toUpperCase() + trimmed.slice(1).toLowerCase();
-    const exists = geItems?.find(i => i.characterId === characterId && i.name?.toLowerCase() === itemName.toLowerCase())
+    const exists = geItems?.find(i => 
+      i.characterId === characterId 
+      && i.name?.toLowerCase() === itemName.toLowerCase()
+      && i.gameVersion === newItemGameVersion
+    )
     if(exists){
       setNewItemModalError('An item already exists with that name.')
       return
@@ -72,7 +76,7 @@ export default function CharacterGEItems() {
         name: itemName,
         characterId: characterId as string,
         geTimestamp: DateTime.utc().toISO(),
-        gameVersion: newItemGameVersion as GEItemGameVersion,
+        gameVersion: newItemGameVersion as CharacterGEItemGameVersion,
         showItemDetail: false
       }
   
@@ -348,6 +352,11 @@ export default function CharacterGEItems() {
               </button>
             </div>
             <div>
+              <button title='Determines where to refresh data from.' className='button-link destructive'>
+                {getShortGameNameByVersion(item.gameVersion as CharacterGEItemGameVersion)}
+              </button>
+            </div>
+            <div>
               <button onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
                 Refresh
               </button>
@@ -365,7 +374,7 @@ export default function CharacterGEItems() {
 
           {item.showItemDetail === true && <div className='list-item-body'>
             <div style={{textAlign: 'center'}}>
-                {getGameNameByVersion(item.gameVersion as GEItemGameVersion)}
+                {getGameNameByVersion(item.gameVersion as CharacterGEItemGameVersion)}
             </div>
 
             <div className='flex-wrap-gap'>

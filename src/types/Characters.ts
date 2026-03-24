@@ -8,7 +8,7 @@ export interface Character {
   showItemHistoryItemId: string | undefined
 }
 
-export type GEItemGameVersion = 'osrs' | 'rs'
+export type CharacterGEItemGameVersion = 'osrs' | 'rs'
 export interface CharacterGEItem {
   id?: string
   characterId: string
@@ -16,7 +16,7 @@ export interface CharacterGEItem {
   price?: number
   volume?: number
   geTimestamp?: string;
-  gameVersion?: GEItemGameVersion
+  gameVersion?: CharacterGEItemGameVersion
   showItemDetail: boolean
 }
 
@@ -49,6 +49,7 @@ export interface CharacterGEOrder {
   showListDetail: boolean
   showListOrderItems: boolean
   editNotes: boolean
+  showNotes: boolean
 }
 
 export interface CharacterGEOrderItem {
@@ -61,4 +62,10 @@ export interface CharacterGEOrderItem {
   sellAmount: number
   taxed: boolean
   showListDetail: boolean
+  status: CharacterGEOrderStatus
+}
+
+export interface QuickOrderItem {
+  orderId: string
+  itemId: string
 }

@@ -214,7 +214,7 @@ export default function CharacterList(){
     </div>
 
     <div className='app-actions'>
-      <div className='flex-wrap-gap'>
+      <div className='flex-wrap-gap' style={{gap: '1em'}}>
         <div>
           <div>
             New Character Name
@@ -246,7 +246,7 @@ export default function CharacterList(){
             <input 
               onChange={(e) => {setSearch(e.target.value)}} 
               type='text'
-              placeholder='Enter character name...'
+              placeholder='Search character name...'
               value={search ?? ''}
               maxLength={16}
               style={{width: '33vh'}}
@@ -317,25 +317,37 @@ export default function CharacterList(){
           totalGP += txn.amount
         }
         return <div key={`${character.id}_${index}`} className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
-          <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}} onClick={() => {}}>
-            <div>
-              <button className='button-link collapse' onClick={() => {handleToggleCharacterDetail(
-                character.id, 
-                typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
-              )}}>
-                {typeof character.showListDetail !== 'undefined' && character.showListDetail === true ? ' - ' : ' + '} {character.name}
+          <div className='list-item-title' onClick={() => {}}>
+            <div style={{float: 'right'}} hidden={!showDanger}>              
+              <button 
+                key={`btnDeleteCharacter_${character.id}`} 
+                className='button-link action danger' 
+                onClick={() => {handleDeleteDataByCharacterId(character.id)}}
+                title={`Delete ${character?.name}`}
+              >
+                Delete
+              </button>
+            </div>
+            <div className='flex-wrap-gap'>
+              <div>
+                <button className='button-link collapse' onClick={() => {handleToggleCharacterDetail(
+                  character.id, 
+                  typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
+                )}}>
+                  {typeof character.showListDetail !== 'undefined' && character.showListDetail === true ? ' - ' : ' + '} {character.name}
 
-              </button>
-            </div>
-            <div>
-              <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
-                Items
-              </button>
-            </div>
-            <div>
-              <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
-                Orders
-              </button>
+                </button>
+              </div>
+              <div>
+                <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
+                  Items
+                </button>
+              </div>
+              <div>
+                <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
+                  Orders
+                </button>
+              </div>
             </div>
           </div>
 
@@ -380,16 +392,7 @@ export default function CharacterList(){
                 },
               ]} />
                           
-              <div className='danger-zone' hidden={!showDanger}>              
-                <button 
-                  key={`btnDeleteCharacter_${character.id}`} 
-                  className='button-link action danger' 
-                  onClick={() => {handleDeleteDataByCharacterId(character.id)}}
-                  title={`Delete ${character?.name}`}
-                >
-                  Delete
-                </button>
-              </div>
+              
             </div>
           </div>}
           

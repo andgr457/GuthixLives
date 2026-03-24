@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CharacterGEItem, CharacterGEOrderItem } from '../../../types/Characters'
+import type { CharacterGEItem, CharacterGEOrderItem, CharacterGEItemGameVersion } from '../../../types/Characters'
 import Modal from '../../core/Modal'
 import { DateTime } from 'luxon'
 import AppErrorSection from '../../core/AppErrorSection'
 import CharacterGEOrderOrderItem from '../CharacterGEOrderOrderItem'
+import { useKeyPress } from '../../../hooks/useKeyPress'
+import { getShortGameNameByVersion } from '../CharactersConstants'
 
 interface NewGEOrderModalProps {
   showNewOrderModal: boolean
@@ -24,12 +26,18 @@ interface NewGEOrderModalProps {
 export default function NewGEOrderModal(props: NewGEOrderModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedItemId, setSelectedItemId] = useState('')
-
+  const [selectedItemFilter, setSelectedItemFilter] = useState<'both' | CharacterGEItemGameVersion>('both')
   useEffect(() => {
     if (props.showNewOrderModal) {
       inputRef.current?.focus();
     }
   }, [props.showNewOrderModal]);
+
+  const handleEnterPress = () => {
+    props.onConfirm()
+  };
+
+  useKeyPress('Enter', handleEnterPress);
 
   const handleAddOrderItem = useCallback(() => {
     if(!selectedItemId) return
@@ -45,7 +53,8 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
       boughtPrice: 0,
       sellAmount: 0,
       sellPrice: 0,
-      showListDetail: true
+      showListDetail: true,
+      status: 'Pending'
     })
     for(const item of props.newOrderOrderItems){
       item.showListDetail = false
@@ -146,6 +155,17 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
     props.setNewOrderOrderItems(newOrderItems)
   }, [props.newOrderOrderItems])
 
+  const availableItems = props.characterGEItems.filter((geItem => {
+    if(selectedItemFilter === 'both'){
+      return true
+    }
+    if(selectedItemFilter === geItem.gameVersion){
+      return true
+    } else {
+      return false
+    }
+  }))
+
   return <Modal
     isOpen={props.showNewOrderModal}
     onClose={props.onCancel}
@@ -184,7 +204,7 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
       </div>
       <div>
         <div>
-          Available Items
+          {availableItems.length} Available Items
         </div>
         <div>
           <select
@@ -195,26 +215,44 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
             }}
           >
             <option>Select Item</option>
-            {props.characterGEItems.map((geItem) => {
+            {availableItems.map((geItem) => {
               return <option value={geItem.id}>
-                {geItem.name}
+                {geItem.name} - {getShortGameNameByVersion(geItem.gameVersion as CharacterGEItemGameVersion)}
               </option>
             })}
           </select>
-        </div>
-        
-        <div style={{marginTop: '8px'}}>
-          <button style={{width: '100%'}} className='button-link' onClick={handleAddOrderItem}>
-            Add Selected Item
+          <button 
+            className='button-link action' 
+            onClick={handleAddOrderItem}
+          >
+            Add
+          </button>
+          |
+          <button 
+            className={`button-link action ${selectedItemFilter === 'both' ? 'selected' : ''}`} 
+            onClick={() => {setSelectedItemFilter('both')}}
+          >
+            ALL
+          </button>
+          <button 
+            className={`button-link action ${selectedItemFilter === 'osrs' ? 'selected' : ''}`}  
+            onClick={() => {setSelectedItemFilter('osrs')}}
+          >
+            OSRS
+          </button>
+          <button 
+            className={`button-link action ${selectedItemFilter === 'rs' ? 'selected' : ''}`} 
+            onClick={() => {setSelectedItemFilter('rs')}}
+          >
+            RS3
           </button>
         </div>
       </div>
       
     </div>
-    <hr/>
     <div >
       {props.newOrderOrderItems?.length === 0 && <div style={{textAlign: 'center'}}>
-        Add more order items...
+        
       </div>}
       {props.newOrderOrderItems?.map((orderItem) => {
         const filteredOut = false
@@ -222,6 +260,8 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
         return <div className={`list-item-slow-hide ${filteredOut ? 'hide' : ''}`}>
           <CharacterGEOrderOrderItem
             orderItem={orderItem}
+            handleDeleteOrderItemById={() => {}}
+            showDanger={false}
             setOrderItemShowListDetail={handleToggleShowOrderItemListDetail}
             relatedGEItem={relatedItem as CharacterGEItem}
             setOrderItemBoughtAmount={handleSetOrderItemBoughtAmount}
@@ -239,7 +279,6 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
         </div>
       })}
     </div>
-    <hr/>
     <div>
       <button 
         className='button-link'

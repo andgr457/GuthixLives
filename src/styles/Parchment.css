@@ -2,22 +2,20 @@
   cursor: unset;
   position: relative;
   padding: 1.5rem;
-  color: black;
-  font-weight: bolder;
-  letter-spacing: 3px;
-  background: #b09241;
+  color: rgb(0, 0, 0);
+  letter-spacing: 1px;
+  background: #856d2d;
     /* radial-gradient(circle at 20% 20%, rgba(255,255,255,0.25), transparent 40%), */
     /* radial-gradient(circle at 80% 80%, rgba(0,0,0,0.15), transparent 50%), */
     /* linear-gradient(180deg, #b09241 0%, #e8d8a8 100%); */
 
-  border: 4px solid #c2a96b;
+  border: 2px solid #c2a96b;
   border-radius: 6px;
 
   box-shadow:
     inset 0 0 25px rgba(255, 255, 255, 0.25),
     0 4px 10px rgba(0,0,0,0.4);
-
-  word-break: break-all;
+  word-spacing: 2px;
   scroll-behavior: smooth;
   overflow-y: auto;
 }
@@ -44,4 +42,22 @@
 
 .parchment::selection {
   background: rgba(120, 90, 40, 0.3);
+}
+
+.parchment.notes {
+  margin-left: 2em;
+  margin-right: 2em;
+  font-size: 1em;
+  padding: 1em;
+  opacity: 80%;
+  transition: all 0.5s ease-in-out;
+
+}
+
+.parchment.notes:hover {
+  padding: 1.5em;
+  opacity: 100%;
+  cursor: pointer;
+  background: #ac8c35;
+  transition: all 0.5s ease-in-out;
 }

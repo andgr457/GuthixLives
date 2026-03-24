@@ -62,8 +62,8 @@ export default function NewGEItemModal(props: NewGEItemModalProps){
         </div>
       </div>
       <div>
-        <div>
-          Game Version
+        <div title='Determine what API endpoint to look at when refreshing data.'>
+          Game Version &#9432;
         </div>
         <div>
           <select
