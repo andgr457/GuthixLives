@@ -66,7 +66,7 @@ export default function CharacterGEItems() {
       && i.gameVersion === newItemGameVersion
     )
     if(exists){
-      setNewItemModalError('An item already exists with that name.')
+      setNewItemModalError('An item already exists with that name and version combination.')
       return
     }
     try {

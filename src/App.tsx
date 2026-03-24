@@ -10,6 +10,7 @@ import ToonPlanner from './pages/toon/ToonPlanner';
 import ToonTasks from './pages/toon/ToonTasks';
 import CharacterGEOrderPlanner from './pages/characters/CharacterGEOrders';
 import { ConfirmProvider } from './context/ConfirmProvider';
+import Dashboard from './pages/dashboard/Dashboard';
 
 export default function App() {
   return (
@@ -20,6 +21,8 @@ export default function App() {
         <Route path='/characters' element={<CharacterList />} />
         <Route path="/characters/:characterId/ge-items" element={<CharacterGEItems />} />
         <Route path="/characters/:characterId/ge-orders" element={<CharacterGEOrderPlanner />} />
+        
+        <Route path='/dashboard' element={<Dashboard />} />
         
         <Route path="/toonplanner" element={<ToonPlanner />} />
         <Route path="/getracker" element={<GETracker />} />

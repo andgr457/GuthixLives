@@ -251,8 +251,8 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
       
     </div>
     <div >
-      {props.newOrderOrderItems?.length === 0 && <div style={{textAlign: 'center'}}>
-        
+      {props.newOrderOrderItems?.length === 0 && <div className='basic-div' style={{fontSize: 'smaller'}}>
+        No order items added. Select an item from the list above and click "ADD".
       </div>}
       {props.newOrderOrderItems?.map((orderItem) => {
         const filteredOut = false
@@ -272,7 +272,7 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
           >
             <div>
               <button className='button-link destructive' onClick={() => {handleRemoveOrderItem(orderItem.id)}}>
-                Remove
+                Remove Temporary Order Item
               </button>
             </div>
           </CharacterGEOrderOrderItem>
@@ -298,7 +298,7 @@ export default function NewGEOrderModal(props: NewGEOrderModalProps) {
         Cancel
       </button>
     </div>
-    <div>
+    <div style={{textAlign: 'center'}}>
       <AppErrorSection error={props.newOrderModalError} />
     </div>
     <div>

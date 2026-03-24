@@ -10,6 +10,7 @@ import { useKeyPress } from '../../hooks/useKeyPress';
 import useScrollReveal from '../../hooks/useScrollReveal';
 import { useNavigate } from 'react-router-dom';
 import { useConfirm } from '../../context/ConfirmProvider';
+import CharacterLinks from './CharacterLinks';
 
 export default function CharacterList(){
   const showConfirm = useConfirm();
@@ -207,10 +208,14 @@ export default function CharacterList(){
   
   return <div className='characters-app reveal'>
     <div id='top'></div>
-    <div>
+    <div className='list-item-header'>
       <div className='app-title'>
         Characters
       </div>
+      <CharacterLinks 
+        page='characters' 
+        characterId={undefined}
+      />
     </div>
 
     <div className='app-actions'>
@@ -338,20 +343,18 @@ export default function CharacterList(){
 
                 </button>
               </div>
-              <div>
-                <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
-                  Items
-                </button>
-              </div>
-              <div>
-                <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
-                  Orders
-                </button>
-              </div>
             </div>
           </div>
 
           {character.showListDetail === true && <div className='list-item-body'> 
+            <div>
+              <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
+                Items
+              </button>
+              <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
+                Orders
+              </button>
+            </div>
             <div className='flex-wrap-gap'>
               <InfoSection sectionTitle='GP'
                 // linkUrl={`/characters/${character.id}/gp`}

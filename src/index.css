@@ -42,8 +42,56 @@
   color: rgb(241, 216, 79);
   letter-spacing: 3px;
   padding: 0.25em;
-  margin-top: 10px;
-  animation: shake 0.5s ease-in-out forwards;
+  opacity: 0%;
+  animation: appear 1s ease-in-out forwards;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 5%;
+  }
+  10% {
+    opacity: 25%;
+  }
+  20% {
+    opacity: 60%;
+  }
+  30% {
+    opacity: 25%;
+
+  }
+  40% {
+    opacity: 60%;
+
+  }
+  50% {
+    opacity: 25%;
+
+  }
+  60% {
+    opacity: 60%;
+
+  }
+  70% {
+    opacity: 25%;
+
+  }
+  80% {
+    opacity: 60%;
+
+  }
+  90% {
+    opacity: 25%;
+
+  }
+  100% {
+    opacity: 100%;
+
+  }
+}
+
+.app-error:hover {
+  cursor: pointer;
 }
 
 @keyframes shake {

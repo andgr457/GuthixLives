@@ -12,6 +12,7 @@ import NewGEOrderModal from './modals/NewGEOrderModal'
 import '../../styles/Parchment.css'
 import { useConfirm } from '../../context/ConfirmProvider'
 import CharacterGEOrderView from './CharacterGEOrderView'
+import { timeout } from '../../services/common/Timing.service'
 
 export default function CharacterGEOrderPlanner() {
   useScrollReveal()
@@ -97,17 +98,22 @@ export default function CharacterGEOrderPlanner() {
     setGEOrderItems(newOrderItems)
   }, [geItems, geOrderItems, selectedQuickOrderItem])
 
-  const handleAddOrderClicked = useCallback(() => {
-    if(!newOrderOrderItems || newOrderOrderItems.length === 0){
-      setNewOrderModalError('At least 1 order item is required.')
-      return
+  const handleAddOrderClicked = useCallback(async () => {
+    if(newOrderModalError){
+      setNewOrderModalError('')
+      await timeout(1000)
     }
-    if(!newOrderTitle || !newOrderTitle?.trim()){
+    const title = newOrderTitle?.trim()
+    if(!title){
       setNewOrderModalError('Order title is required.')
       return
     }
+    if(!newOrderOrderItems || newOrderOrderItems.length === 0){
+      if(!await showConfirm('Add the order without any order items? These can be added later.')){
+        return
+      }
+    }
 
-    const title = newOrderTitle.trim()
     const orderId = `o__${title}__${characterId}__${DateTime.utc().toMillis()}`
     const newOrder: CharacterGEOrder = {
       id: orderId,
@@ -122,29 +128,27 @@ export default function CharacterGEOrderPlanner() {
       showNotes: !newOrderNotes ? false : true
     }
 
-    const newOrderItems = []
-    for(const item of newOrderOrderItems){
-      item.orderId = orderId
-      item.showListDetail = false
-      newOrderItems.push(item)
+    if(newOrderOrderItems && newOrderOrderItems.length > 0){
+      const newOrderItems = []
+      for(const item of newOrderOrderItems){
+        item.orderId = orderId
+        item.showListDetail = false
+        newOrderItems.push(item)
+      }
+      for(const orderItem of geOrderItems){
+        orderItem.showListDetail = false
+        newOrderItems.push(orderItem)
+      }
+      setGEOrderItems(newOrderItems)
     }
-    
+
     const newOrders = []
     newOrders.push(newOrder)
     for(const order of geOrders){
       order.showListDetail = false
       newOrders.push(order)
-    }
-
-    for(const orderItem of geOrderItems){
-      orderItem.showListDetail = false
-      newOrderItems.push(orderItem)
-    }
-    
+    }    
     setGEOrders(newOrders)
-    setGEOrderItems(newOrderItems)
-
-    setNewItemName('')
 
     setNewOrderTitle('')
     setNewOrderModalError('')
@@ -160,6 +164,7 @@ export default function CharacterGEOrderPlanner() {
     newOrderTitle,
     newOrderNotes,
     newOrderOrderItems,
+    newOrderModalError
   ])
 
   const handleAddItemClicked = useCallback(async () => {
@@ -171,9 +176,13 @@ export default function CharacterGEOrderPlanner() {
 
     const trimmed = newItemName.trim()
     const itemName = trimmed[0].toUpperCase() + trimmed.slice(1).toLowerCase();
-    const exists = geItems?.find(i => i.characterId === characterId && i.name?.toLowerCase() === itemName.toLowerCase())
+    const exists = geItems?.find(
+      i => i.characterId === characterId 
+      && i.name?.toLowerCase() === itemName.toLowerCase()
+      && i.gameVersion === newItemGameVersion
+    )
     if(exists){
-      setNewItemModalError('An item already exists with that name.')
+      setNewItemModalError('An item already exists with that name and version combination.')
       return
     }
     try {
@@ -226,10 +235,7 @@ export default function CharacterGEOrderPlanner() {
     }
   }, [newItemName, newItemGameVersion, geItems])
 
-  const handleClearNewOrder = useCallback(async () => {
-    if(!await showConfirm('Clear draft order information?', 'New Order Clear')){
-      return
-    }
+  const handleClearNewOrder = useCallback(() => {
     setNewOrderModalError('')
     setNewOrderNotes('')
     setNewOrderOrderItems([])
@@ -237,11 +243,12 @@ export default function CharacterGEOrderPlanner() {
   }, [])
 
   const handleDeleteOrderById = useCallback(async (orderId: string) => {
-    const ok = await showConfirm(
+    if(!await showConfirm(
       'Are you sure you want to delete this order and its order items?',
       'Delete Order & Order Items!'
-    )
-    if(!ok) return
+    )){
+      return
+    }
     
     const newOrders = []
     for(const order of geOrders){

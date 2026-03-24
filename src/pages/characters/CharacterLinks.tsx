@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 
 interface CharacterLinksProps {
-  page: 'items' | 'orders'
-  characterId: string
+  page: 'items' | 'orders' | 'characters' | 'dashboard'
+  characterId?: string
 }
 
 export default function CharacterLinks(props: CharacterLinksProps) {
@@ -12,35 +12,43 @@ export default function CharacterLinks(props: CharacterLinksProps) {
   const normal = {filter: 'brightness(1)'}
 
   return <div style={{textAlign: 'center'}}>
-
     <button 
       className='button-link' 
       style={
-        normal
+        props.page === 'characters' ? bright : normal
       }
       onClick={() => {navigate('/characters')}}
     >
       Characters
     </button>
-    &nbsp;&nbsp;&nbsp;&nbsp;
     <button 
       className='button-link' 
       style={
-        props.page === 'items' ? bright : normal
+        props.page === 'dashboard' ? bright : normal
       }
-      onClick={() => {navigate(`/characters/${props.characterId}/ge-items`)}}
+      onClick={() => {navigate('/dashboard')}}
     >
-      Items
+      Dashboard
     </button>
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <button 
-      className='button-link'
-      style={
-        props.page === 'orders' ? bright : normal
-      }
-      onClick={() => {navigate(`/characters/${props.characterId}/ge-orders`)}}
-    >
-      Orders
-    </button>
+    {props.characterId && <>
+      <button 
+        className='button-link' 
+        style={
+          props.page === 'items' ? bright : normal
+        }
+        onClick={() => {navigate(`/characters/${props.characterId}/ge-items`)}}
+      >
+        Items
+      </button>
+      <button 
+        className='button-link'
+        style={
+          props.page === 'orders' ? bright : normal
+        }
+        onClick={() => {navigate(`/characters/${props.characterId}/ge-orders`)}}
+      >
+        Orders
+      </button>
+    </>}    
   </div>
 }
