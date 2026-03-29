@@ -343,7 +343,7 @@ export default function CharacterGEItems() {
         }
         return <div className={`${filteredOut ? 'reveal' : ''} list-item-slow-hide ${filteredOut ? 'hide' : ''}  `} key={`${item.id}__${index}`}>
           <div className='list-item-title flex-wrap-gap' style={{gap: '1.5em'}}>
-            <div>
+            <div className='appear'>
               <button 
                 className='button-link collapse'
                 onClick={() => {handleSetShowItemDetail(item.id as string, !(item.showItemDetail ?? false))}}
@@ -352,14 +352,17 @@ export default function CharacterGEItems() {
               </button>
             </div>
             <div>
-              <button title='Determines where to refresh data from.' className='button-link destructive'>
+              <button title='Determines where to refresh data from.' 
+                className='button-link alt'>
                 {getShortGameNameByVersion(item.gameVersion as CharacterGEItemGameVersion)}
               </button>
-              <button title='Determines where to refresh data from.' className='button-link destructive'>
+              <button title='Latest GP price.' 
+                className='button-link alt'>
                 {item.price?.toLocaleString() ?? 0} GP
               </button>
               <button 
-                onClick={() => {handleItemRefresh(item.id as string)}} className='button-link' >
+                onClick={() => {handleItemRefresh(item.id as string)}} 
+                className='button-link' >
                 Refresh
               </button>
               <button onClick={() => {

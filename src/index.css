@@ -51,21 +51,21 @@
     opacity: 5%;
   }
   10% {
-    opacity: 25%;
+    opacity: 10%;
   }
   20% {
-    opacity: 60%;
+    opacity: 20%;
   }
   30% {
-    opacity: 25%;
+    opacity: 30%;
 
   }
   40% {
-    opacity: 60%;
+    opacity: 40%;
 
   }
   50% {
-    opacity: 25%;
+    opacity: 50%;
 
   }
   60% {
@@ -73,15 +73,15 @@
 
   }
   70% {
-    opacity: 25%;
+    opacity: 70%;
 
   }
   80% {
-    opacity: 60%;
+    opacity: 80%;
 
   }
   90% {
-    opacity: 25%;
+    opacity: 90%;
 
   }
   100% {
@@ -90,17 +90,79 @@
   }
 }
 
+@keyframes disappear {
+  0% {
+    opacity: 100%;
+  }
+  10% {
+    opacity: 90%;
+  }
+  20% {
+    opacity: 80%;
+  }
+  30% {
+    opacity: 70%;
+    
+  }
+  40% {
+    opacity: 60%;
+    
+  }
+  50% {
+    opacity: 50%;
+    
+  }
+  60% {
+    opacity: 40%;
+    
+  }
+  70% {
+    opacity: 30%;
+    
+  }
+  80% {
+    opacity: 20%;
+    
+  }
+  90% {
+    opacity: 10%;
+    
+  }
+  100% {
+    opacity: 5%;
+
+  }
+}
+
+
 .app-error:hover {
   cursor: pointer;
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-1px); }
-  40% { transform: translateX(1px); }
-  60% { transform: translateX(-2px); }
-  80% { transform: translateX(2px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-1px);
+  }
+
+  40% {
+    transform: translateX(0px);
+  }
+
+  60% {
+    transform: translateX(1px);
+  }
+
+  80% {
+    transform: translateX(0px);
+  }
+
+  100% {
+    transform: translateX(-1);
+  }
 }
 
 .app-actions {
@@ -303,7 +365,7 @@
   width: 100%;
   height: fit-content;
   border-radius: 10px;
-  background-color: #1b1b1b;
+  background-color: #383838;
 
   opacity: 1;
   transform: scaleY(1);
@@ -478,17 +540,17 @@ textarea::-webkit-resizer {
 }
 
 
-button {
+/* button {
   padding: 0.25rem 0.5rem;
-  font-size: 0.85rem; /* smaller font */
+  font-size: 0.85rem; 
 
   font-family: inherit;
   font-weight: 700;
   border-radius: 4px;
   border: 2px solid var(--gold-dark);
   cursor: pointer;
-  /* transition: 10s ease; */
-}
+  transition: 10s ease;
+} */
 
 
 .button-link {
@@ -578,10 +640,23 @@ button {
   ;
 }
 
+.button-link.alt {
+  color:#1d70b4;
+  text-shadow:
+  0 0 1px #fff
+  ,0 0 2px #1d70b4
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 3px #1d70b4
+  ;
+}
+
+
 .button-link:hover {
-  text-decoration: none;
-  color:#5ec776;
-  animation: shake .45s both infinite;
+  color:#FFD700;
+  animation: shake .85s both;
 }
 
 button.primary {
@@ -610,13 +685,13 @@ button.primary:hover {
 
 @keyframes button-colorize-primary {
   0% {
-    background: #e6b844;
+    background: #745811;
   }
   50% {
-    background: #e6b844c8;
+    background: #ad8110c8;
   }
   100% {
-    background: #e6b844;
+    background: inherit;
   }
 }
 

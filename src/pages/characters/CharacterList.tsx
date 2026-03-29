@@ -340,21 +340,20 @@ export default function CharacterList(){
                   typeof character.showListDetail === 'undefined' ? true : !character.showListDetail
                 )}}>
                   {typeof character.showListDetail !== 'undefined' && character.showListDetail === true ? ' - ' : ' + '} {character.name}
-
+                </button>
+              </div>
+              <div>
+                <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
+                  Items
+                </button>
+                <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
+                  Orders
                 </button>
               </div>
             </div>
           </div>
 
           {character.showListDetail === true && <div className='list-item-body'> 
-            <div>
-              <button onClick={() => {navigate(`/characters/${character.id}/ge-items`)}} className='button-link'>
-                Items
-              </button>
-              <button onClick={() => {navigate(`/characters/${character.id}/ge-orders`)}} className='button-link'>
-                Orders
-              </button>
-            </div>
             <div className='flex-wrap-gap'>
               <InfoSection sectionTitle='GP'
                 // linkUrl={`/characters/${character.id}/gp`}
