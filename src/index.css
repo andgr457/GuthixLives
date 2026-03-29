@@ -356,12 +356,19 @@
 }
 
 .list-item-body {
-  padding: 8px;
+  background-color: #3f3f3f;
+  font-size: 14px;
+}
+
+.list-item-body.second {
+  background-color: #1b1b1b !important;
+  color: white;
+  padding: 10px;
 }
 
 
 /* Base visible item */
-.list-item-slow-hide {
+/* .list-item-slow-hide {
   width: 100%;
   height: fit-content;
   border-radius: 10px;
@@ -372,9 +379,9 @@
   transform: scaleX(1);
 
   transition: all 0.35s ease-in-out;
-  margin: 0.4em 0;       /* optional spacing between items */
-  line-height: 1;         /* ensures no extra height */
-}
+  margin: 0.4em 0;       
+  line-height: 1;    
+} */
 
 .list-item-header{
   background: #1e2f22;
@@ -562,7 +569,8 @@ textarea::-webkit-resizer {
   border-radius: 6px;
   height: 25px;
   margin: 5px;
-  padding: 10px;
+  padding: 4px;
+  font-size: 14px;
   text-shadow:
   0 0 1px #fff
   ,0 0 2px #5ec776

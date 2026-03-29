@@ -42,7 +42,7 @@ export default function CharacterGEOrderOrderItem(props: CharacterGEOrderItemPro
     </div>
 
     {props.orderItem.showListDetail === true && <div className='list-item-body'>
-      <div className='list-item-body flex-wrap-gap' style={{gap: '8px'}}>
+      <div className='list-item-body second flex-wrap-gap' style={{gap: '8px'}}>
         <div>
           <div>
             Bought Amount
@@ -73,7 +73,7 @@ export default function CharacterGEOrderOrderItem(props: CharacterGEOrderItemPro
 
       </div>
 
-      <div className='list-item-body flex-wrap-gap' style={{gap: '8px'}}>
+      <div className='list-item-body second flex-wrap-gap' style={{gap: '8px'}}>
         <div>
           <div>
             Sell Amount
@@ -103,19 +103,13 @@ export default function CharacterGEOrderOrderItem(props: CharacterGEOrderItemPro
         </div>
       </div>
 
-      <div className='list-item-body flex-wrap-gap' style={{gap: '8px'}}>
-        <div>
-          <div>
-            Is Taxed?
-          </div>
-          <div>
-            <input 
-              type='checkbox'
-              checked={props.orderItem.taxed ?? true}
-              onChange={(e) => props.setOrderItemIsTaxed(props.orderItem.id, e.currentTarget.checked)}
-            />
-          </div>
-        </div>
+      <div className='list-item-body second flex-wrap-gap' style={{gap: '8px'}}>
+        <button 
+          className={`button-link action ${props.orderItem.taxed && 'selected'}`}
+          onClick={() => {props.setOrderItemIsTaxed(props.orderItem.id, !props.orderItem.taxed)}}
+        >
+          Taxed
+        </button>
       </div>
 
       <div>

@@ -1,10 +1,12 @@
 .info-section {
   padding: 20px;
+  letter-spacing: 1px;
+
 }
 
 
 .info-section-title {
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: #FFD700;
 
 }
@@ -14,7 +16,6 @@
 }
 
 .info-section-item-title {
-  letter-spacing: 2px;
 }
 
 .info-section-item-value {

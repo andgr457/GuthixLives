@@ -95,7 +95,10 @@ export default function CharacterGEOrderView(props: CharacterGEOrderProps) {
     </div>
     
     {order.showListDetail === true && <div className='list-item-body'>
-      <div className='basic-div' style={{fontSize: '0.8em'}}>
+      <div className='list-item-body' style={{padding: '0.5em'}}>
+        <div>
+          Status
+        </div>
         <select
           className="rs-select"
           style={{width: '33vh'}}
@@ -109,19 +112,6 @@ export default function CharacterGEOrderView(props: CharacterGEOrderProps) {
         </select>
       </div>
       <div className='flex-wrap-gap'>
-        <InfoSection 
-          sectionTitle='Details'
-          items={[
-            {
-              title: 'Created',
-              value: createdDate
-            },
-            {
-              title: 'Completed',
-              value: completedDate ?? 'N/A'
-            }
-          ]}
-        />
         <InfoSection 
           sectionTitle='Totals'
           items={[
@@ -143,6 +133,20 @@ export default function CharacterGEOrderView(props: CharacterGEOrderProps) {
             }
           ]}
         />
+        <InfoSection 
+          sectionTitle='Details'
+          items={[
+            {
+              title: 'Created',
+              value: createdDate
+            },
+            {
+              title: 'Completed',
+              value: completedDate ?? 'N/A'
+            }
+          ]}
+        />
+        
       </div>
       <div style={{padding: '1em'}}>
         <div className='list-item-title second' style={{fontSize: '1em'}}>
