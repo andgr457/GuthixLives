@@ -6,6 +6,7 @@ import type { Character, CharacterGPTransaction, CharacterGEItem, CharacterGEIte
 import CharacterLinks from '../characters/CharacterLinks';
 import { CharacterStorageKeys } from '../characters/CharactersConstants';
 import InfoSection from '../core/InfoSection';
+import '../../styles/Dashboard.css'
 
 export default function Dashboard() {
   useScrollReveal()
@@ -38,10 +39,12 @@ export default function Dashboard() {
   const [showFilters, setShowFilters] = useState(false)
   const [filterByCharacterId, setFilterByCharacterId] = useState('')
   const [filterByGameVersion, setFilterByGameVersion] = useState('')
+  const [filterByItem, setFilterByItem] = useState('')
   
   const clearFilters = () => {
     setFilterByCharacterId('')
     setFilterByGameVersion('')
+    setFilterByItem('')
   }
 
   let totalBought = 0
@@ -50,6 +53,14 @@ export default function Dashboard() {
   let totalSellAmount = 0
   let totalGains = 0
   let totalTax = 0
+
+  const uniqueItemNames: string[] = []
+  geItems.forEach((i) => {
+    if(!uniqueItemNames.includes(i.name as string)){
+      uniqueItemNames.push(i.name as string)
+    }
+  })
+  uniqueItemNames.sort()
 
   geOrderItems.forEach((oi) => {
     if(filterByCharacterId){
@@ -61,6 +72,12 @@ export default function Dashboard() {
     if(filterByGameVersion){
       const relatedItem = geItems.find(i => i.id === oi.itemId)
       if(relatedItem?.gameVersion !== filterByGameVersion){
+        return
+      }
+    }
+    if(filterByItem){
+      const relatedItem = geItems.find(i => i.id === oi.itemId)
+      if(relatedItem?.name !== filterByItem){
         return
       }
     }
@@ -89,14 +106,23 @@ export default function Dashboard() {
       />
     </div>
 
-    <div>
-      <div className='list-item-title'>
+    <div className='dashboard-filters'>
+      <div className='list-item-title second flex-wrap-gap'>
         <button
           className='button-link collapse'
           onClick={() => {setShowFilters(!showFilters)}}
         >
           {showFilters === true ? '-' : '+'} Filters
         </button>
+        {filterByCharacterId && <button className='button-link alt' onClick={() => {setFilterByCharacterId('')}}>
+          {characters.find(c => c.id === filterByCharacterId)?.name}
+        </button>}
+        {filterByGameVersion && <button className='button-link alt' onClick={() => {setFilterByGameVersion('')}}>
+          {filterByGameVersion.toUpperCase()}
+        </button>}
+        {filterByItem && <button className='button-link alt' onClick={() => {setFilterByItem('')}}>
+          {filterByItem.toUpperCase()}
+        </button>}
       </div>
       {showFilters === true && <div className='list-item-body'>
         <InfoSection 
@@ -109,10 +135,17 @@ export default function Dashboard() {
             {
               title: 'Game Version',
               value: filterByGameVersion ? filterByGameVersion.toUpperCase() : 'NO'
+            },
+            {
+              title: 'Items',
+              value: filterByItem ? filterByItem : 'NO'
             }
           ]}
         />
-        <div className='flex-wrap-gap'>
+        <div>
+          Options
+        </div>
+        <div className='dashboard-filter-selects flex-wrap-gap'>
           <div>
             <select
               className='rs-select'
@@ -136,6 +169,18 @@ export default function Dashboard() {
               <option value=''>Filter Game</option>
               <option value='osrs'>OSRS</option>
               <option value='rs'>RS 3</option>
+            </select>
+          </div>
+          <div>
+            <select
+              className='rs-select'
+              value={filterByItem}
+              onChange={(e) => {setFilterByItem(e.currentTarget.value)}}
+            >
+              <option value=''>Filter Item</option>
+              {uniqueItemNames.map(ui => {
+                return <option value={ui}>{ui}</option>
+              })}
             </select>
           </div>
         </div>

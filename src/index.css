@@ -317,6 +317,7 @@
 
 .list-item-title {
   background-color: #1e2f22;
+  border-radius: 2px;
   padding: 15px;
   cursor: pointer;
   letter-spacing: 2px;
@@ -329,6 +330,8 @@
 .list-item-title.second {
   position: unset;
   z-index: 1;            /* sits above other content */
+  padding: 1px;
+  border-radius: 3px;
 }
 
 .list-item-title-sub {
@@ -649,9 +652,9 @@ textarea::-webkit-resizer {
 }
 
 .button-link.alt {
-  color:#1d70b4;
+  color:#359ff7;
   text-shadow:
-  0 0 1px #fff
+  0 0 1px #1d70b4
   ,0 0 2px #1d70b4
   /* ,0 0 15px #FFD700
   ,0 0 20px #FFD700
@@ -659,6 +662,20 @@ textarea::-webkit-resizer {
   ,0 0 30px #FFD700 */
   ,0 0 3px #1d70b4
   ;
+}
+
+.button-link.alt:hover {
+   color:#359ff7;
+  text-shadow:
+  0 0 1px #1d70b4
+  ,0 0 2px #1d70b4
+  /* ,0 0 15px #FFD700
+  ,0 0 20px #FFD700
+  ,0 0 25px #FFD700
+  ,0 0 30px #FFD700 */
+  ,0 0 3px #1d70b4
+  ;
+  filter: brightness(2)
 }
 
 
